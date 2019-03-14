@@ -14,7 +14,6 @@ To start using the nf-core/imcyto pipeline, follow the steps below:
   * [Singularity](#singularity)
   * [Conda](#conda)
   * [Configuration profiles](#configuration-profiles)
-* [Reference genomes](#reference-genomes)
 <!-- TOC END -->
 
 ## Install NextFlow
@@ -107,7 +106,3 @@ To use it first ensure that you have conda installed (we recommend [miniconda](h
 ### Configuration profiles
 
 See [`docs/configuration/adding_your_own.md`](configuration/adding_your_own.md)
-
-## Reference genomes
-
-See [`docs/configuration/reference_genomes.md`](configuration/reference_genomes.md)
