@@ -36,7 +36,6 @@
   * [`--max_cpus`](#--max_cpus)
   * [`--plaintext_email`](#--plaintext_email)
   * [`--monochrome_logs`](#--monochrome_logs)
-  * [`--multiqc_config`](#--multiqc_config)
 <!-- TOC END -->
 
 
@@ -277,6 +276,3 @@ Set to receive plain-text e-mails instead of HTML formatted.
 
 ### `--monochrome_logs`
 Set to disable colourful command line output and live life in monochrome.
-
-### `--multiqc_config`
-Specify a path to a custom MultiQC configuration file.

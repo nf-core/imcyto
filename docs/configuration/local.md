@@ -5,14 +5,14 @@ If running the pipeline in a local environment, we highly recommend using either
 ## Docker
 Docker is a great way to run `nf-core/imcyto`, as it manages all software installations and allows the pipeline to be run in an identical software environment across a range of systems.
 
-Nextflow has [excellent integration](https://www.nextflow.io/docs/latest/docker.html) with Docker, and beyond installing the two tools, not much else is required. The `nf-core/imcyto` profile comes with a configuration profile for docker, making it very easy to use. This also comes with the required presets to use the AWS iGenomes resource, meaning that if using common reference genomes you just specify the reference ID and it will be automatically downloaded from AWS S3.
+Nextflow has [excellent integration](https://www.nextflow.io/docs/latest/docker.html) with Docker, and beyond installing the two tools, not much else is required. The `nf-core/imcyto` profile comes with a configuration profile for docker, making it very easy to use.
 
 First, install docker on your system: [Docker Installation Instructions](https://docs.docker.com/engine/installation/)
 
 Then, simply run the analysis pipeline:
 
 ```bash
-nextflow run nf-core/imcyto -profile docker --genome '<genome ID>' --design '<path to your design file>'
+nextflow run nf-core/imcyto  -profile docker --mcd '*.mcd'--metadata 'metadata.csv' --full_stack_cppipe full_stack.cppipe --segmentation_cppipe segmentation.cppipe
 ```
 
 Nextflow will recognise `nf-core/imcyto` and download the pipeline from GitHub. The `-profile docker` configuration lists the [nf-core/imcyto](https://hub.docker.com/r/nfcore/imcyto/) image that we have created and is hosted at dockerhub, and this is downloaded.
