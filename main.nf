@@ -155,8 +155,6 @@ if( workflow.profile == 'awsbatch') {
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
-//summary['Pipeline Name']                = 'nf-core/imcyto'              // EXCLUDED FROM NF-CORE v1.5
-//summary['Pipeline Version']             = workflow.manifest.version     // EXCLUDED FROM NF-CORE v1.5
 summary['Run Name']                     = custom_runName ?: workflow.runName
 summary['MCD Files']                    = params.mcd
 summary['Metadata File']                = params.metadata
@@ -167,9 +165,6 @@ if(!params.skipIlastik) summary['Ilastik Training ilp File'] = params.ilastik_tr
 summary['Segmentation cppipe File']     = params.segmentation_cppipe
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
-//summary['Current Home']                 = "$HOME"              // EXCLUDED FROM NF-CORE v1.5
-//summary['Current User']                 = "$USER"              // EXCLUDED FROM NF-CORE v1.5
-//summary['Current Path']                 = "$PWD"               // EXCLUDED FROM NF-CORE v1.5
 summary['Output Dir']                   = params.outdir
 summary['Launch Dir']                   = workflow.launchDir
 summary['Working Dir']                  = workflow.workDir
@@ -184,7 +179,7 @@ if(workflow.profile == 'awsbatch'){
    summary['AWS Queue']                 = params.awsqueue
 }
 if(params.email) summary['E-mail Address']  = params.email
-log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
+log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "\033[2m----------------------------------------------------\033[0m"
 
 // Check the hostnames against configured profiles
