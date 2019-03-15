@@ -40,4 +40,4 @@ The pipeline was developed by [Harshil Patel](mailto:harshil.patel@crick.ac.uk) 
 
 Many thanks to others who contributed as a result of the Crick Data Challenge (Jan 2019) - [Gavin Kelly](mailto:gavin.kelly@crick.ac.uk), [Becky Saunders](mailto:becky.saunders@crick.ac.uk), [Katey Enfield](mailto:katey.enfield@crick.ac.uk), [Alix Lemarois](mailto:alix.lemarois@crick.ac.uk), [Nuria Folguera Blasco](mailto:nuria.folguerablasco@crick.ac.uk), [Andre Altmann](mailto:a.altmann@ucl.ac.uk).
 
-It would have been impossible to develop this pipeline without the guidelines, scripts and plugins provided by the [Bodenmiller Lab](http://www.bodenmillerlab.com/). Thank you too!
+It would not have been possible to develop this pipeline without the guidelines, scripts and plugins provided by the [Bodenmiller Lab](http://www.bodenmillerlab.com/). Thank you too!
