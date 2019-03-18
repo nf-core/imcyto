@@ -5,5 +5,6 @@ LABEL authors="Harshil Patel" \
 COPY environment_ilastik.yml /
 RUN conda env create -f /environment_ilastik.yml && conda clean -a
 ENV PATH /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/bin:$PATH
+RUN ln -s /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/run_ilastik.sh /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/bin
 #RUN alias run_ilastik.sh='/opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/run_ilastik.sh'
-RUN cp /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/run_ilastik.sh /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/bin
+#RUN cp /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/run_ilastik.sh /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/bin
