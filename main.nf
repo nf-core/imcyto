@@ -11,27 +11,25 @@
 
 
 def helpMessage() {
-    // TODO nf-core: Add to this help message with new command line parameters
     log.info nfcoreHeader()
     log.info"""
 
     Usage:
 
     The typical command for running the pipeline is as follows:
-
-    nextflow run nf-core/imcyto --mcd '*.mcd'--metadata 'metadata.csv' --full_stack_cppipe full_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
+    nextflow run nf-core/imcyto --mcd '*.mcd'--metadata metadata.csv --full_stack_cppipe full_stack.cppipe --ilastik_stack_cppipe ilastik_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
 
     Mandatory arguments:
-      --mcd                         Path to input mcd file(s) (must be surrounded with quotes)
-      --metadata                    Path to metadata csv file indicating which images to merge in fullstack
-      --full_stack_cppipe           CellProfiler pipeline file required to merge images (*.cppipe format)
-      --ilastik_stack_cppipe        CellProfiler pipeline file required to merge images (*.cppipe format)
-      --segmentation_cppipe         CellProfiler pipeline file required to merge images (*.cppipe format)
+      --mcd                         Path to input Mass Cytometery Data file(s) (must be surrounded with quotes)
+      --metadata                    Path to metadata csv file indicating which images to merge in full stack and/or ilastik stack
+      --full_stack_cppipe           CellProfiler pipeline file required to create full stack (*.cppipe format)
+      --ilastik_stack_cppipe        CellProfiler pipeline file required to create Ilastik stack (*.cppipe format)
+      --segmentation_cppipe         CellProfiler pipeline file required for segmentation (*.cppipe format)
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: conda, docker, singularity, awsbatch, test and more.
 
     Other options:
-      --ilastik_training_ilp        Project file required by Ilastik (*.ilp format)
+      --ilastik_training_ilp        Paramter file required by Ilastik (*.ilp format)
       --skipIlastik                 Skip Ilastik processing step
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -65,17 +63,17 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
 }
 
 // Stage config files
-ch_output_docs = Channel.fromPath("$baseDir/docs/output.md", checkIfExists: true)
+ch_output_docs = file("$baseDir/docs/output.md")
 
 ////////////////////////////////////////////////////
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
 
 /*
- * Create a channel for input read files
+ * Create a channel for input Mass Cytometry Data (mcd) files
  */
 if( params.mcd ){
-    mcd = Channel
+    ch_mcd = Channel
         .fromPath(params.mcd, checkIfExists: true)
         .map { it -> [ it.name.take(it.name.lastIndexOf('.')), it ] }
         .ifEmpty { exit 1, "MCD file not found: ${params.mcd}" }
@@ -84,42 +82,37 @@ if( params.mcd ){
 }
 
 if( params.metadata ){
-    metadata = Channel
-        .fromPath(params.metadata, checkIfExists: true)
-        .ifEmpty { exit 1, "Metadata csv file not found: ${params.metadata}" }
+    ch_metadata = file(params.metadata)
+    if( !ch_metadata.exists() ) exit 1, "Metadata csv file not found: ${params.metadata}"
 } else {
    exit 1, "Metadata csv file not specified!"
 }
 
 if( params.full_stack_cppipe ){
-    full_stack_cppipe = Channel
-        .fromPath(params.full_stack_cppipe, checkIfExists: true)
-        .ifEmpty { exit 1, "CellProfiler full stack cppipe file not found: ${params.full_stack_cppipe}" }
+    ch_full_stack_cppipe = file(params.full_stack_cppipe)
+    if( !ch_full_stack_cppipe.exists() ) exit 1, "CellProfiler full stack cppipe file not found: ${params.full_stack_cppipe}"
 } else {
    exit 1, "CellProfiler full stack cppipe file not specified!"
 }
 
 if( params.ilastik_stack_cppipe ){
-    ilastik_stack_cppipe = Channel
-        .fromPath(params.ilastik_stack_cppipe, checkIfExists: true)
-        .ifEmpty { exit 1, "Ilastik stack cppipe file not found: ${params.ilastik_stack_cppipe}" }
+    ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe)
+    if( !ch_ilastik_stack_cppipe.exists() ) exit 1, "Ilastik stack cppipe file not found: ${params.ilastik_stack_cppipe}"
 } else {
    exit 1, "Ilastik stack cppipe file not specified!"
 }
 
 if( params.segmentation_cppipe ){
-    segmentation_cppipe = Channel
-        .fromPath(params.segmentation_cppipe, checkIfExists: true)
-        .ifEmpty { exit 1, "CellProfiler segmentation cppipe file not found: ${params.segmentation_cppipe}" }
+    ch_segmentation_cppipe = file(params.segmentation_cppipe)
+    if( !ch_segmentation_cppipe.exists() ) exit 1, "CellProfiler segmentation cppipe file not found: ${params.segmentation_cppipe}"
 } else {
    exit 1, "CellProfiler segmentation cppipe file not specified!"
 }
 
 if( !params.skipIlastik) {
     if( params.ilastik_training_ilp ){
-        ilastik_training_ilp = Channel
-            .fromPath(params.ilastik_training_ilp, checkIfExists: true)
-            .ifEmpty { exit 1, "Ilastik training ilp file not found: ${params.ilastik_training_ilp}" }
+        ch_ilastik_training_ilp = file(params.ilastik_training_ilp)
+        if( !ch_ilastik_training_ilp.exists() ) exit 1, "Ilastik training ilp file not found: ${params.ilastik_training_ilp}"
     } else {
        exit 1, "Ilastik training ilp file not specified!"
     }
@@ -127,9 +120,9 @@ if( !params.skipIlastik) {
 
 // Plugins required for CellProfiler
 Channel.fromPath("$baseDir/assets/plugins/", checkIfExists: true)
-       .into { preprocess_full_stack_plugin;
-               preprocess_ilastik_stack_plugin;
-               segmentation_plugin }
+       .into { ch_preprocess_full_stack_plugin;
+               ch_preprocess_ilastik_stack_plugin;
+               ch_segmentation_plugin }
 
 ////////////////////////////////////////////////////
 /* --                   AWS                    -- */
@@ -201,12 +194,12 @@ process imctools {
     publishDir "${params.outdir}/imctools/${name}", mode: 'copy'
 
     input:
-    set val(name), file(mcd) from mcd
-    file metadata from metadata.collect()
+    set val(name), file(mcd) from ch_mcd
+    file metadata from ch_metadata
 
     output:
-    set val(name), file("*/full_stack/*") into full_stack_tiff
-    set val(name), file("*/ilastik_stack/*") into ilastik_stack_tiff
+    set val(name), file("*/full_stack/*") into ch_full_stack_tiff
+    set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
 
     script: // This script is bundled with the pipeline, in nf-core/imcyto/bin/
     """
@@ -230,35 +223,35 @@ def flatten_tiff(ArrayList channel) {
 }
 
 // Group full stack files by sample and roi_id
-full_stack_tiff.map { flatten_tiff(it) }
-               .flatten()
-               .collate(3)
-               .groupTuple(by: [0,1])
-               .map { it -> [ it[0], it[1], it[2].sort() ] }
-               .set { full_stack_tiff }
-
-// Group ilastik stack files by sample and roi_id
-ilastik_stack_tiff.map { flatten_tiff(it) }
+ch_full_stack_tiff.map { flatten_tiff(it) }
                   .flatten()
                   .collate(3)
                   .groupTuple(by: [0,1])
                   .map { it -> [ it[0], it[1], it[2].sort() ] }
-                  .set { ilastik_stack_tiff }
+                  .set { ch_full_stack_tiff }
+
+// Group ilastik stack files by sample and roi_id
+ch_ilastik_stack_tiff.map { flatten_tiff(it) }
+                     .flatten()
+                     .collate(3)
+                     .groupTuple(by: [0,1])
+                     .map { it -> [ it[0], it[1], it[2].sort() ] }
+                     .set { ch_ilastik_stack_tiff }
 
 /*
 * STEP 2 - PREPROCESS FULL STACK IMAGES WITH CELLPROFILER
 */
-process preprocess_full_stack {
+process preprocessFullStack {
     tag "${name}.${roi}"
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
-    set val(name), val(roi), file(tiff) from full_stack_tiff
-    file cppipe from full_stack_cppipe.collect()
-    file plugin_dir from preprocess_full_stack_plugin.collect()
+    set val(name), val(roi), file(tiff) from ch_full_stack_tiff
+    file cppipe from ch_full_stack_cppipe
+    file plugin_dir from ch_preprocess_full_stack_plugin.collect()
 
     output:
-    set val(name), val(roi), file("full_stack/*") into preprocess_full_stack_tiff
+    set val(name), val(roi), file("full_stack/*") into ch_preprocess_full_stack_tiff
 
     script:
     """
@@ -273,17 +266,17 @@ process preprocess_full_stack {
 /*
 * STEP 3 - PREPROCESS ILASTIK STACK IMAGES WITH CELLPROFILER
 */
-process preprocess_ilastik_stack {
+process preprocessIlastikStack {
     tag "${name}.${roi}"
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
-    set val(name), val(roi), file(tiff) from ilastik_stack_tiff
-    file cppipe from ilastik_stack_cppipe.collect()
-    file plugin_dir from preprocess_ilastik_stack_plugin.collect()
+    set val(name), val(roi), file(tiff) from ch_ilastik_stack_tiff
+    file cppipe from ch_ilastik_stack_cppipe
+    file plugin_dir from ch_preprocess_ilastik_stack_plugin.collect()
 
     output:
-    set val(name), val(roi), file("ilastik_stack/*") into preprocess_ilastik_stack_tiff
+    set val(name), val(roi), file("ilastik_stack/*") into ch_preprocess_ilastik_stack_tiff
 
     script:
     """
@@ -299,21 +292,21 @@ process preprocess_ilastik_stack {
  * STEP 4 - ILASTIK
  */
 if( params.skipIlastik ) {
-  preprocess_full_stack_tiff.join(preprocess_ilastik_stack_tiff, by: [0,1])
+  ch_preprocess_full_stack_tiff.join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
                             .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
-                            .set { preprocess_full_stack_tiff }
+                            .set { ch_preprocess_full_stack_tiff }
 } else {
     process ilastik {
         tag "${name}.${roi}"
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy'
 
         input:
-        set val(name), val(roi), file(tiff) from preprocess_ilastik_stack_tiff
-        file ilastik_training_ilp from ilastik_training_ilp.collect()
+        set val(name), val(roi), file(tiff) from ch_preprocess_ilastik_stack_tiff
+        file ilastik_training_ilp from ch_ilastik_training_ilp
 
         output:
-        set val(name), val(roi), file("*.tiff") into ilastik_tiff
-        file "*.txt" into ilastik_version
+        set val(name), val(roi), file("*.tiff") into ch_ilastik_tiff
+        file "*.txt" into ch_ilastik_version
 
         script:
         """
@@ -328,9 +321,9 @@ if( params.skipIlastik ) {
         python -c "import ilastik; print(ilastik.__version__)" > v_ilastik.txt
         """
     }
-    preprocess_full_stack_tiff.join(ilastik_tiff, by: [0,1])
+    ch_preprocess_full_stack_tiff.join(ch_ilastik_tiff, by: [0,1])
                             .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
-                            .set { preprocess_full_stack_tiff }
+                            .set { ch_preprocess_full_stack_tiff }
 }
 
 /*
@@ -341,13 +334,13 @@ process segmentation {
     publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
 
     input:
-    set val(name), val(roi), file(tiff) from preprocess_full_stack_tiff
-    file cppipe from segmentation_cppipe.collect()
-    file plugin_dir from segmentation_plugin.collect()
+    set val(name), val(roi), file(tiff) from ch_preprocess_full_stack_tiff
+    file cppipe from ch_segmentation_cppipe
+    file plugin_dir from ch_segmentation_plugin.collect()
 
     output:
-    set val(name), val(roi), file("*.csv") into segmentation_csv
-    set val(name), val(roi), file("*.tiff") into segmentation_tiff
+    set val(name), val(roi), file("*.csv") into ch_segmentation_csv
+    set val(name), val(roi), file("*.tiff") into ch_segmentation_tiff
 
     script:
     """
@@ -392,20 +385,18 @@ process get_software_versions {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
-    file txt from ilastik_version.first()
+    file txt from ch_ilastik_version.first()
 
     output:
-    file "software_versions.txt" into software_versions_methods
+    file "software_versions.txt" into ch_software_versions_tsv
 
     script:
-    // TODO nf-core: Get all tools to print their version number here
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     cellprofiler --version > v_cellprofiler.txt
     scrape_software_versions.py > software_versions.txt
     """
-    //NOT WORKING: python -c "import imctools; print(imctools.__spec__)" > imctools.txt
 }
 
 /*
