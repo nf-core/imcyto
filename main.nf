@@ -385,25 +385,28 @@ process output_documentation {
     """
 }
 
-// /*
-//  * Parse software version numbers
-//  */
-// process get_software_versions {
-//     publishDir "${params.outdir}/Documentation", mode: 'copy'
-//
-//     output:
-//     file "software_versions.txt" into software_versions_methods
-//
-//     script:
-//     // TODO nf-core: Get all tools to print their version number here
-//     """
-//     echo $workflow.manifest.version > v_pipeline.txt
-//     echo $workflow.nextflow.version > v_nextflow.txt
-//     cellprofiler --version > v_cellprofiler.txt
-//     scrape_software_versions.py > software_versions.txt
-//     """
-//     //NOT WORKING: python -c "import imctools; print(imctools.__spec__)" > imctools.txt
-// }
+/*
+ * Parse software version numbers
+ */
+process get_software_versions {
+    publishDir "${params.outdir}/Documentation", mode: 'copy'
+
+    input:
+    file txt from ilastik_version.first()
+
+    output:
+    file "software_versions.txt" into software_versions_methods
+
+    script:
+    // TODO nf-core: Get all tools to print their version number here
+    """
+    echo $workflow.manifest.version > v_pipeline.txt
+    echo $workflow.nextflow.version > v_nextflow.txt
+    cellprofiler --version > v_cellprofiler.txt
+    scrape_software_versions.py > software_versions.txt
+    """
+    //NOT WORKING: python -c "import imctools; print(imctools.__spec__)" > imctools.txt
+}
 
 /*
  * Completion e-mail notification
