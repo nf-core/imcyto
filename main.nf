@@ -255,6 +255,7 @@ process preprocessFullStack {
 
     script:
     """
+    set JAVA_OPTS="-Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
@@ -262,6 +263,7 @@ process preprocessFullStack {
                  --output-directory ./full_stack
     """
 }
+//set JAVA_OPTS="-Xms128m -Xmx256m"
 
 /*
 * STEP 3 - PREPROCESS ILASTIK STACK IMAGES WITH CELLPROFILER
@@ -280,6 +282,7 @@ process preprocessIlastikStack {
 
     script:
     """
+    set JAVA_OPTS="-Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
@@ -344,6 +347,7 @@ process segmentation {
 
     script:
     """
+    set JAVA_OPTS="-Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
