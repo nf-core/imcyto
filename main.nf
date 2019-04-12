@@ -243,6 +243,7 @@ ch_ilastik_stack_tiff.map { flatten_tiff(it) }
 */
 process preprocessFullStack {
     tag "${name}.${roi}"
+    label 'process_medium'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
@@ -270,6 +271,7 @@ process preprocessFullStack {
 */
 process preprocessIlastikStack {
     tag "${name}.${roi}"
+    label 'process_medium'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
@@ -334,6 +336,7 @@ if( params.skipIlastik ) {
  */
 process segmentation {
     tag "${name}.${roi}"
+    label 'process_big'
     publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
 
     input:
