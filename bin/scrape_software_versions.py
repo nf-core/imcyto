@@ -8,16 +8,16 @@ regexes = {
     'nf-core/imcyto': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'CellProfiler': ['v_cellprofiler.txt', r"(\S+)"],
-    'Ilastik': ['v_ilastik.txt', r"(\S+)"]
-    #'imctools': ['v_imctools.txt', r"(\S+)"],
+    'Ilastik': ['v_ilastik.txt', r"(\S+)"],
+    'imctools': ['v_imctools.txt', r"(\S+)"],
 }
 
 results = OrderedDict()
-results['nf-core/imcyto'] = 'NA'
-results['Nextflow'] = 'NA'
-results['CellProfiler'] = 'NA'
-results['Ilastik'] = 'NA'
-#results['imctools'] = 'NA'
+results['nf-core/imcyto'] = '<span style="color:#999999;\">N/A</span>'
+results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
+results['CellProfiler'] = '<span style="color:#999999;\">N/A</span>'
+results['Ilastik'] = '<span style="color:#999999;\">N/A</span>'
+results['imctools'] = False
 
 # Search each file using its regex
 for k, v in regexes.items():
@@ -27,6 +27,26 @@ for k, v in regexes.items():
         if match:
             results[k] = "v{}".format(match.group(1))
 
-# Dump to TSV
+# Remove software set to false in results
+for k in results:
+    if not results[k]:
+        del(results[k])
+
+# Dump to YAML
+print ('''
+id: 'software_versions'
+section_name: 'nf-core/imcyto Software Versions'
+section_href: 'https://github.com/nf-core/imcyto'
+plot_type: 'html'
+description: 'are collected at run time from the software output.'
+data: |
+    <dl class="dl-horizontal">
+''')
 for k,v in results.items():
-    print("{}\t{}".format(k,v))
+    print("        <dt>{}</dt><dd><samp>{}</samp></dd>".format(k,v))
+print ("    </dl>")
+
+# Write out regexes as csv file:
+with open('software_versions.csv', 'w') as f:
+    for k,v in results.items():
+        f.write("{}\t{}\n".format(k,v))

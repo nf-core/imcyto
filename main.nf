@@ -59,7 +59,7 @@ if (params.help){
 //  this has the bonus effect of catching both -name and --name
 custom_runName = params.name
 if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
-  custom_runName = workflow.runName
+    custom_runName = workflow.runName
 }
 
 // Stage config files
@@ -81,41 +81,12 @@ if( params.mcd ){
    exit 1, "MCD file not specified!"
 }
 
-if( params.metadata ){
-    ch_metadata = file(params.metadata)
-    if( !ch_metadata.exists() ) exit 1, "Metadata csv file not found: ${params.metadata}"
-} else {
-   exit 1, "Metadata csv file not specified!"
-}
-
-if( params.full_stack_cppipe ){
-    ch_full_stack_cppipe = file(params.full_stack_cppipe)
-    if( !ch_full_stack_cppipe.exists() ) exit 1, "CellProfiler full stack cppipe file not found: ${params.full_stack_cppipe}"
-} else {
-   exit 1, "CellProfiler full stack cppipe file not specified!"
-}
-
-if( params.ilastik_stack_cppipe ){
-    ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe)
-    if( !ch_ilastik_stack_cppipe.exists() ) exit 1, "Ilastik stack cppipe file not found: ${params.ilastik_stack_cppipe}"
-} else {
-   exit 1, "Ilastik stack cppipe file not specified!"
-}
-
-if( params.segmentation_cppipe ){
-    ch_segmentation_cppipe = file(params.segmentation_cppipe)
-    if( !ch_segmentation_cppipe.exists() ) exit 1, "CellProfiler segmentation cppipe file not found: ${params.segmentation_cppipe}"
-} else {
-   exit 1, "CellProfiler segmentation cppipe file not specified!"
-}
-
+if( params.metadata ){ ch_metadata = file(params.metadata, checkIfExists: true) } else { exit 1, "Metadata csv file not specified!" }
+if( params.full_stack_cppipe ){ ch_full_stack_cppipe = file(params.full_stack_cppipe, checkIfExists: true) } else { exit 1, "CellProfiler full stack cppipe file not specified!" }
+if( params.ilastik_stack_cppipe ){ ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe, checkIfExists: true) } else { exit 1, "Ilastik stack cppipe file not specified!" }
+if( params.segmentation_cppipe ){ ch_segmentation_cppipe = file(params.segmentation_cppipe, checkIfExists: true) } else { exit 1, "CellProfiler segmentation cppipe file not specified!" }
 if( !params.skipIlastik) {
-    if( params.ilastik_training_ilp ){
-        ch_ilastik_training_ilp = file(params.ilastik_training_ilp)
-        if( !ch_ilastik_training_ilp.exists() ) exit 1, "Ilastik training ilp file not found: ${params.ilastik_training_ilp}"
-    } else {
-       exit 1, "Ilastik training ilp file not specified!"
-    }
+    if( params.ilastik_training_ilp ){ ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
 }
 
 // Plugins required for CellProfiler
@@ -243,7 +214,7 @@ ch_ilastik_stack_tiff.map { flatten_tiff(it) }
 */
 process preprocessFullStack {
     tag "${name}.${roi}"
-    label 'process_medium'
+    label 'process_big'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
@@ -256,7 +227,7 @@ process preprocessFullStack {
 
     script:
     """
-    set JAVA_OPTS="-Xmx${task.memory.toGiga()}g"
+    export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
@@ -264,14 +235,13 @@ process preprocessFullStack {
                  --output-directory ./full_stack
     """
 }
-//set JAVA_OPTS="-Xms128m -Xmx256m"
 
 /*
 * STEP 3 - PREPROCESS ILASTIK STACK IMAGES WITH CELLPROFILER
 */
 process preprocessIlastikStack {
     tag "${name}.${roi}"
-    label 'process_medium'
+    label 'process_big'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
@@ -284,7 +254,7 @@ process preprocessIlastikStack {
 
     script:
     """
-    set JAVA_OPTS="-Xmx${task.memory.toGiga()}g"
+    export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
@@ -303,6 +273,7 @@ if( params.skipIlastik ) {
 } else {
     process ilastik {
         tag "${name}.${roi}"
+        label 'process_big'
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy'
 
         input:
@@ -316,10 +287,10 @@ if( params.skipIlastik ) {
         script:
         """
         cp $ilastik_training_ilp ilastik_params.ilp
-        run_ilastik.sh --headless \
-                       --project=ilastik_params.ilp \
-                       --output_format="tiff sequence" \
-                       --output_filename_format=./{nickname}_{result_type}_{slice_index}.tiff \
+        run_ilastik.sh --headless \\
+                       --project=ilastik_params.ilp \\
+                       --output_format="tiff sequence" \\
+                       --output_filename_format=./{nickname}_{result_type}_{slice_index}.tiff \\
                        $tiff
         rm  ilastik_params.ilp
 
@@ -350,7 +321,7 @@ process segmentation {
 
     script:
     """
-    set JAVA_OPTS="-Xmx${task.memory.toGiga()}g"
+    export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
@@ -389,20 +360,25 @@ process output_documentation {
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outdir}/Documentation", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
+        saveAs: {filename ->
+            if (filename.indexOf(".csv") > 0) filename
+            else null
+        }
 
     input:
     file txt from ch_ilastik_version.first()
 
     output:
-    file "software_versions.txt" into ch_software_versions_tsv
+    file "software_versions.csv"
 
     script:
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     cellprofiler --version > v_cellprofiler.txt
-    scrape_software_versions.py > software_versions.txt
+    touch v_imctools.txt
+    scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
 
