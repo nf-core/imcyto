@@ -228,12 +228,14 @@ process preprocessFullStack {
 
     script:
     """
-    #export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
+    export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
                  --plugins-directory ./${plugin_dir} \\
-                 --output-directory ./full_stack
+                 --output-directory ./full_stack \\
+                 --log-level DEBUG \\
+                 --temporary-directory ./tmp
     """
 }
 
@@ -255,12 +257,14 @@ process preprocessIlastikStack {
 
     script:
     """
-    #export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
+    export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
                  --plugins-directory ./${plugin_dir} \\
-                 --output-directory ./ilastik_stack
+                 --output-directory ./ilastik_stack \\
+                 --log-level DEBUG \\
+                 --temporary-directory ./tmp
     """
 }
 
@@ -322,13 +326,14 @@ process segmentation {
 
     script:
     """
-    #export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
+    export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
                  --plugins-directory ./${plugin_dir} \\
                  --output-directory ./ \\
-                 -t ./tmp
+                 --log-level DEBUG \\
+                 --temporary-directory ./tmp
     """
 }
 

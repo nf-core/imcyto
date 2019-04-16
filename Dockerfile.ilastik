@@ -3,6 +3,6 @@ LABEL authors="Harshil Patel" \
       description="Docker image containing Ilastik requirements for nf-core/imcyto pipeline"
 
 COPY environment_ilastik.yml /
-RUN conda env create -f /environment_ilastik.yml && conda clean -a
+RUN conda env create -v -v -v -f /environment_ilastik.yml && conda clean -a
 ENV PATH /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/bin:$PATH
 RUN ln -s /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/run_ilastik.sh /opt/conda/envs/nf-core-imcyto-ilastik-1.0dev/bin
