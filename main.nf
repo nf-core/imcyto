@@ -162,6 +162,7 @@ checkHostname()
  */
 process imctools {
     tag "$name"
+    label 'process_medium'
     publishDir "${params.outdir}/imctools/${name}", mode: 'copy'
 
     input:
@@ -214,7 +215,7 @@ ch_ilastik_stack_tiff.map { flatten_tiff(it) }
 */
 process preprocessFullStack {
     tag "${name}.${roi}"
-    label 'process_big'
+    label 'process_medium'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
@@ -227,7 +228,7 @@ process preprocessFullStack {
 
     script:
     """
-    export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
+    #export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
@@ -241,7 +242,7 @@ process preprocessFullStack {
 */
 process preprocessIlastikStack {
     tag "${name}.${roi}"
-    label 'process_big'
+    label 'process_medium'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
@@ -254,7 +255,7 @@ process preprocessIlastikStack {
 
     script:
     """
-    export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
+    #export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
@@ -273,7 +274,7 @@ if( params.skipIlastik ) {
 } else {
     process ilastik {
         tag "${name}.${roi}"
-        label 'process_big'
+        label 'process_medium'
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy'
 
         input:
@@ -321,12 +322,13 @@ process segmentation {
 
     script:
     """
-    export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
+    #export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
     cellprofiler --run-headless \\
                  --pipeline $cppipe \\
                  --image-directory ./ \\
                  --plugins-directory ./${plugin_dir} \\
-                 --output-directory ./
+                 --output-directory ./ \\
+                 -t ./tmp
     """
 }
 
