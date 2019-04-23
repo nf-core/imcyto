@@ -8,15 +8,15 @@ regexes = {
     'nf-core/imcyto': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'CellProfiler': ['v_cellprofiler.txt', r"(\S+)"],
-    'Ilastik': ['v_ilastik.txt', r"(\S+)"],
-    'imctools': ['v_imctools.txt', r"(\S+)"],
+    #'Ilastik': ['v_ilastik.txt', r"(\S+)"],
+    'imctools': ['v_imctools.txt', r"(\S+)"]
 }
 
 results = OrderedDict()
 results['nf-core/imcyto'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['CellProfiler'] = '<span style="color:#999999;\">N/A</span>'
-results['Ilastik'] = '<span style="color:#999999;\">N/A</span>'
+#results['Ilastik'] = '<span style="color:#999999;\">N/A</span>'
 results['imctools'] = False
 
 # Search each file using its regex

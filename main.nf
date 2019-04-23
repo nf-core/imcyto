@@ -275,6 +275,7 @@ if( params.skipIlastik ) {
   ch_preprocess_full_stack_tiff.join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
                             .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
                             .set { ch_preprocess_full_stack_tiff }
+  ch_ilastik_version = []
 } else {
     process ilastik {
         tag "${name}.${roi}"
@@ -373,8 +374,8 @@ process get_software_versions {
             else null
         }
 
-    input:
-    file txt from ch_ilastik_version.first()
+    //input:
+    //file txt from ch_ilastik_version.first()
 
     output:
     file "software_versions.csv"
