@@ -14,12 +14,11 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 ## Pipeline summary
 
-1. Convert mcd file into individual tiffs ([`imctools`](https://github.com/BodenmillerGroup/imctools))
-2. Remove outliers and apply median filter to tiff files. Save as image sequence ([`Fiji`](https://fiji.sc/))
-3. Find CD44, MHCcII, DNA tiffs and merge. Save as tiff ([`Fiji`](https://fiji.sc/))
-4. Use merged tiff to classify pixels as membrane, nuclei, background. Save probabilities as tif sequence ([`Ilastik`](https://www.ilastik.org/))
-5. Use probability tifs and filtered tiffs for single cell segmentation and create cell mask. Save as tiff. ([`CellProfiler`](https://cellprofiler.org/))
-6. Overlay cell mask onto tiff images to extract single cell information and save as csv file ([`histoCAT`](http://www.bodenmillerlab.com/research-2/histocat/))
+1. Split mcd file by ROI, and save full and ilastik stacks separately based on specification in `metadata.csv` ([`imctools`](https://github.com/BodenmillerGroup/imctools))
+2. Remove outliers and apply median filter to full stack tiff files ([`CellProfiler`](https://cellprofiler.org/))
+3. Merge images from ilastik stack and save as a composite tiff ([`CellProfiler`](https://cellprofiler.org/))
+4. Use composite tiff to classify pixels as membrane, nuclei or background, and save probabilities map as tiff ([`Ilastik`](https://www.ilastik.org/))
+5. Use probability tiffs and preprocessed full stack tiffs for single cell segmentation to generate a cell mask as tiff and then overlay cell mask onto full stack tiff images to extract single cell information generating a csv file ([`CellProfiler`](https://cellprofiler.org/))
 
 ## Documentation
 
