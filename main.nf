@@ -31,6 +31,7 @@ def helpMessage() {
     Other options:
       --ilastik_training_ilp        Paramter file required by Ilastik (*.ilp format)
       --skipIlastik                 Skip Ilastik processing step
+      --plugins                     Directory with plugin files required for CellProfiler. Default: assets/plugins
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -90,7 +91,7 @@ if( !params.skipIlastik) {
 }
 
 // Plugins required for CellProfiler
-Channel.fromPath("$baseDir/assets/plugins/", checkIfExists: true)
+Channel.fromPath(params.plugins, checkIfExists: true)
        .into { ch_preprocess_full_stack_plugin;
                ch_preprocess_ilastik_stack_plugin;
                ch_segmentation_plugin }

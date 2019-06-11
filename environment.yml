@@ -36,4 +36,4 @@ dependencies:
 
   ## install CellProfiler
   - pip:
-    - git+https://github.com/CellProfiler/CellProfiler.git@master
+    - git+https://github.com/CellProfiler/CellProfiler.git@v3.1.8
