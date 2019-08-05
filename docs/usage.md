@@ -86,9 +86,6 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
 
 * `awsbatch`
   * A generic configuration profile to be used with AWS Batch.
-* `conda`
-  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
-  * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `docker`
   * A generic configuration profile to be used with [Docker](http://docker.com/)
   * Pulls software from dockerhub: [`nfcore/imcyto`](http://hub.docker.com/r/nfcore/imcyto/)

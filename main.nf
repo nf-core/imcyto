@@ -9,7 +9,6 @@
 ----------------------------------------------------------------------------------------
 */
 
-
 def helpMessage() {
     // TODO nf-core: Add to this help message with new command line parameters
     log.info nfcoreHeader()
@@ -27,15 +26,21 @@ def helpMessage() {
       --ilastik_stack_cppipe        CellProfiler pipeline file required to create Ilastik stack (*.cppipe format)
       --segmentation_cppipe         CellProfiler pipeline file required for segmentation (*.cppipe format)
       -profile                      Configuration profile to use. Can use multiple (comma separated)
-                                    Available: conda, docker, singularity, awsbatch, test and more.
+                                    Available: docker, singularity, awsbatch, test and more.
 
     Other options:
       --ilastik_training_ilp        Paramter file required by Ilastik (*.ilp format)
-      --skipIlastik                 Skip Ilastik processing step
       --plugins                     Directory with plugin files required for CellProfiler. Default: assets/plugins
+      --skipIlastik                 Skip Ilastik processing step
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+
+    Containers
+    --imctools_container            Full path to Docker/Singularity image containing imctools
+    --cellprofiler_container        Full path to Docker/Singularity image containing CellProfiler
+    --ilastik_container             Full path to Docker/Singularity image containing Ilastik
+    --rmarkdown_container           Full path to Docker/Singularity image containing R markdown
 
     AWSBatch options:
       --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
@@ -130,6 +135,10 @@ summary['Ilastik Stack cppipe File']    = params.ilastik_stack_cppipe
 summary['Skip Ilastik Step']            = params.skipIlastik ? 'Yes' : 'No'
 if(!params.skipIlastik) summary['Ilastik Training ilp File'] = params.ilastik_training_ilp
 summary['Segmentation cppipe File']     = params.segmentation_cppipe
+summary['Imctools Container']           = params.imctools_container
+summary['CellProfiler Container']       = params.cellprofiler_container
+summary['Ilastik Container']            = params.ilastik_container
+summary['R-markdown Container']         = params.rmarkdown_container
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Output Dir']                   = params.outdir
@@ -166,7 +175,12 @@ checkHostname()
 process imctools {
     tag "$name"
     label 'process_medium'
-    publishDir "${params.outdir}/imctools/${name}", mode: 'copy'
+    container = params.imctools_container
+    publishDir "${params.outdir}/imctools/${name}", mode: 'copy',
+        saveAs: {filename ->
+            if (filename.indexOf("version.txt") > 0) null
+            else filename
+        }
 
     input:
     set val(name), file(mcd) from ch_mcd
@@ -175,10 +189,12 @@ process imctools {
     output:
     set val(name), file("*/full_stack/*") into ch_full_stack_tiff
     set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
+    file "*version.txt" into ch_imctools_version
 
     script: // This script is bundled with the pipeline, in nf-core/imcyto/bin/
     """
     run_imctools.py $mcd $metadata
+    pip show imctools | grep "Version" > imctools_version.txt
     """
 }
 
@@ -219,7 +235,12 @@ ch_ilastik_stack_tiff.map { flatten_tiff(it) }
 process preprocessFullStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
+    container = params.cellprofiler_container
+    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy',
+        saveAs: {filename ->
+            if (filename.indexOf("version.txt") > 0) null
+            else filename
+        }
 
     input:
     set val(name), val(roi), file(tiff) from ch_full_stack_tiff
@@ -228,6 +249,7 @@ process preprocessFullStack {
 
     output:
     set val(name), val(roi), file("full_stack/*") into ch_preprocess_full_stack_tiff
+    file "*version.txt" into ch_cellprofiler_version
 
     script:
     """
@@ -239,6 +261,8 @@ process preprocessFullStack {
                  --output-directory ./full_stack \\
                  --log-level DEBUG \\
                  --temporary-directory ./tmp
+
+    cellprofiler --version > cellprofiler_version.txt
     """
 }
 
@@ -248,6 +272,7 @@ process preprocessFullStack {
 process preprocessIlastikStack {
     tag "${name}.${roi}"
     label 'process_medium'
+    container = params.cellprofiler_container
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
@@ -283,7 +308,12 @@ if( params.skipIlastik ) {
     process ilastik {
         tag "${name}.${roi}"
         label 'process_medium'
-        publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy'
+        container = params.ilastik_container
+        publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy',
+            saveAs: {filename ->
+                if (filename.indexOf("version.txt") > 0) null
+                else filename
+            }
 
         input:
         set val(name), val(roi), file(tiff) from ch_preprocess_ilastik_stack_tiff
@@ -291,19 +321,20 @@ if( params.skipIlastik ) {
 
         output:
         set val(name), val(roi), file("*.tiff") into ch_ilastik_tiff
-        file "*.txt" into ch_ilastik_version
+        file "*version.txt" into ch_ilastik_version
 
         script:
         """
         cp $ilastik_training_ilp ilastik_params.ilp
-        run_ilastik.sh --headless \\
+
+        /ilastik-release/run_ilastik.sh --headless \\
                        --project=ilastik_params.ilp \\
                        --output_format="tiff sequence" \\
                        --output_filename_format=./{nickname}_{result_type}_{slice_index}.tiff \\
                        $tiff
         rm  ilastik_params.ilp
 
-        python -c "import ilastik; print(ilastik.__version__)" > v_ilastik.txt
+        /ilastik-release/bin/python -c "import ilastik; print(ilastik.__version__)" > ilastik_version.txt
         """
     }
     ch_preprocess_full_stack_tiff.join(ch_ilastik_tiff, by: [0,1])
@@ -317,6 +348,7 @@ if( params.skipIlastik ) {
 process segmentation {
     tag "${name}.${roi}"
     label 'process_big'
+    container = params.cellprofiler_container
     publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
 
     input:
@@ -341,18 +373,11 @@ process segmentation {
     """
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                 REPORTS/DOCUMENTATION/EMAIL                         -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * STEP 6 - Output Description HTML
  */
 process output_documentation {
+    container = params.rmarkdown_container
     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
     input:
@@ -371,24 +396,25 @@ process output_documentation {
  * Parse software version numbers
  */
 process get_software_versions {
+    container = params.cellprofiler_container
     publishDir "${params.outdir}/pipeline_info", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf(".csv") > 0) filename
             else null
         }
 
-    //input:
-    //file txt from ch_ilastik_version.first()
+    input:
+    file imctools from ch_imctools_version.first()
+    file cellprofiler from ch_cellprofiler_version.first()
+    file ilastik from ch_ilastik_version.first()
 
     output:
     file "software_versions.csv"
 
     script:
     """
-    echo $workflow.manifest.version > v_pipeline.txt
-    echo $workflow.nextflow.version > v_nextflow.txt
-    cellprofiler --version > v_cellprofiler.txt
-    touch v_imctools.txt
+    echo $workflow.manifest.version > pipeline_version.txt
+    echo $workflow.nextflow.version > nextflow_version.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }

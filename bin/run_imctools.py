@@ -17,8 +17,8 @@ HEADER = ['metal', 'full_stack', 'ilastik_stack']
 fin = open(metadata,'r')
 header = fin.readline().strip().split(',')
 if header != HEADER:
-	print "{} header: {} != {}".format(ERROR_STR,','.join(header),','.join(HEADER))
- 	sys.exit(1)
+	print("{} header: {} != {}".format(ERROR_STR,','.join(header),','.join(HEADER)))
+	sys.exit(1)
 
 metalDict = {}
 for line in fin.readlines():
@@ -26,16 +26,16 @@ for line in fin.readlines():
 
 	## CHECK THREE COLUMNS IN LINE
 	if len(lspl) != len(HEADER):
-		print "{}: Invalid number of columns - should be 3!\nLine: '{}'".format(ERROR_STR,line.strip())
+		print("{}: Invalid number of columns - should be 3!\nLine: '{}'".format(ERROR_STR,line.strip()))
 		sys.exit(1)
 
 	## CHECK VALID INCLUDE/EXCLUDE CODES
 	if lspl[1] not in ['0','1'] or lspl[2] not in ['0','1']:
-		print "{}: Invalid column code - should be 0 or 1!\nLine: '{}'".format(ERROR_STR,line.strip())
+		print("{}: Invalid column code - should be 0 or 1!\nLine: '{}'".format(ERROR_STR,line.strip()))
 		sys.exit(1)
 
 	metal = lspl[0].upper()
-	if not metalDict.has_key(metal):
+	if metal not in metalDict:
 		metalDict[metal] = [bool(int(x)) for x in lspl[1:]]
 fin.close()
 
@@ -48,7 +48,7 @@ for acid in mcd.acquisition_ids:
 
 		## WRITE TO APPROPRIATE DIRECTORY
 		metal = l.split('_')[0].upper()
-		if metal in metalDict.keys():
+		if metal in metalDict:
 			for i,j in enumerate(HEADER[1:]):
 				if metalDict[metal][i]:
 					dirname = "roi_%s/%s" % (acid,j)
