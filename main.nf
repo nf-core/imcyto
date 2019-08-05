@@ -36,12 +36,6 @@ def helpMessage() {
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
 
-    Containers
-    --imctools_container            Full path to Docker/Singularity image containing imctools
-    --cellprofiler_container        Full path to Docker/Singularity image containing CellProfiler
-    --ilastik_container             Full path to Docker/Singularity image containing Ilastik
-    --rmarkdown_container           Full path to Docker/Singularity image containing R markdown
-
     AWSBatch options:
       --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
       --awsregion                   The AWS Region for your AWS Batch job to run on
