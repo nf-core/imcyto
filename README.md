@@ -19,6 +19,15 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 4. Use composite tiff to classify pixels as membrane, nuclei or background, and save probabilities map as tiff ([`Ilastik`](https://www.ilastik.org/); *optional*)
 5. Use probability tiffs and preprocessed full stack tiffs for single cell segmentation to generate a cell mask as tiff and then overlay cell mask onto full stack tiff images to extract single cell information generating a csv file ([`CellProfiler`](https://cellprofiler.org/))
 
+<!--
+1. Open mcd file and contained ROIs and save as individual tiff files matching names from metadata.csv file into corresponding folders – full_stack/ilastik_stack (IMCTools)
+2. Apply preprocessing filters to all tiff files in full_stack and save (CellProfiler - full_stack_preprocessing.cppipe)
+3. Merge tiff images from ilastik_stack to obtain RGB image of cell nuclei and membranes and save as a composite.tiff (CellProfiler - ilastik_stack_preprocessing.cppipe)
+4. Use composite.tiff to classify pixels as membrane, nuclei or background, and save probability maps as tiffs (Ilastik)
+5. Use probability tiffs and preprocessed full_stack tiffs for single cell segmentation to generate a cell mask (CellProfiler – segmentation.cppipe)
+6. Overlay cell mask onto full_stack tiff images to extract single cell information generating a csv file (CellProfiler - segmentation.cppipe)
+-->
+
 ## Documentation
 
 The nf-core/imcyto pipeline comes with documentation about the pipeline, found in the `docs/` directory:
@@ -34,7 +43,7 @@ The nf-core/imcyto pipeline comes with documentation about the pipeline, found i
 ## Credits
 The pipeline was originally written by the [The Bioinformatics & Biostatistics Group](https://www.crick.ac.uk/research/science-technology-platforms/bioinformatics-and-biostatistics/) for use at [The Francis Crick Institute](https://www.crick.ac.uk/), London.
 
-The pipeline was developed by [Harshil Patel](mailto:harshil.patel@crick.ac.uk) and [Nourdine Bah](mailto:nourdine.bah@crick.ac.uk) in collaboration with [Karishma Valand](mailto:karishma.valand@crick.ac.uk), [Febe van Maldegem](mailto:febe.vanmaldegem@crick.ac.uk) and [Emma Colliver](mailto:emma.colliver@crick.ac.uk).
+The pipeline was developed by [Harshil Patel](mailto:harshil.patel@crick.ac.uk) and [Nourdine Bah](mailto:nourdine.bah@crick.ac.uk) in collaboration with [Karishma Valand](mailto:karishma.valand@crick.ac.uk), [Febe van Maldegem](mailto:febe.vanmaldegem@crick.ac.uk), [Emma Colliver](mailto:emma.colliver@crick.ac.uk) and [Mihaela Angelova](mailto:mihaela.angelova@crick.ac.uk).
 
 Many thanks to others who contributed as a result of the Crick Data Challenge (Jan 2019) - [Gavin Kelly](mailto:gavin.kelly@crick.ac.uk), [Becky Saunders](mailto:becky.saunders@crick.ac.uk), [Katey Enfield](mailto:katey.enfield@crick.ac.uk), [Alix Lemarois](mailto:alix.lemarois@crick.ac.uk), [Nuria Folguera Blasco](mailto:nuria.folguerablasco@crick.ac.uk), [Andre Altmann](mailto:a.altmann@ucl.ac.uk).
 

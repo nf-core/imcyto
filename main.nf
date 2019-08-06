@@ -17,10 +17,10 @@ def helpMessage() {
     Usage:
 
     The typical command for running the pipeline is as follows:
-    nextflow run nf-core/imcyto --mcd '*.mcd'--metadata metadata.csv --full_stack_cppipe full_stack.cppipe --ilastik_stack_cppipe ilastik_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
+    nextflow run nf-core/imcyto --input '*.mcd'--metadata metadata.csv --full_stack_cppipe full_stack.cppipe --ilastik_stack_cppipe ilastik_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
 
     Mandatory arguments:
-      --mcd                         Path to input Mass Cytometery Data file(s) (must be surrounded with quotes)
+      --input                       Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd, *.txt and *.tiff
       --metadata                    Path to metadata csv file indicating which images to merge in full stack and/or ilastik stack
       --full_stack_cppipe           CellProfiler pipeline file required to create full stack (*.cppipe format)
       --ilastik_stack_cppipe        CellProfiler pipeline file required to create Ilastik stack (*.cppipe format)
@@ -31,6 +31,7 @@ def helpMessage() {
     Other options:
       --ilastik_training_ilp        Paramter file required by Ilastik (*.ilp format)
       --plugins                     Directory with plugin files required for CellProfiler. Default: assets/plugins
+      --compensation_tiff           Tiff file for compensation analysis during CellProfiler preprocessing steps
       --skipIlastik                 Skip Ilastik processing step
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -71,23 +72,25 @@ ch_output_docs = file("$baseDir/docs/output.md")
 ////////////////////////////////////////////////////
 
 /*
- * Create a channel for input Mass Cytometry Data (mcd) files
+ * Create a channel for input files
  */
-if( params.mcd ){
+if( params.input ){
     ch_mcd = Channel
-        .fromPath(params.mcd, checkIfExists: true)
+        .fromPath(params.input, checkIfExists: true)
         .map { it -> [ it.name.take(it.name.lastIndexOf('.')), it ] }
-        .ifEmpty { exit 1, "MCD file not found: ${params.mcd}" }
+        .ifEmpty { exit 1, "Input file not found: ${params.input}" }
 } else {
-   exit 1, "MCD file not specified!"
+   exit 1, "Input file not specified!"
 }
 
-if( params.metadata ){ ch_metadata = file(params.metadata, checkIfExists: true) } else { exit 1, "Metadata csv file not specified!" }
-if( params.full_stack_cppipe ){ ch_full_stack_cppipe = file(params.full_stack_cppipe, checkIfExists: true) } else { exit 1, "CellProfiler full stack cppipe file not specified!" }
-if( params.ilastik_stack_cppipe ){ ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe, checkIfExists: true) } else { exit 1, "Ilastik stack cppipe file not specified!" }
-if( params.segmentation_cppipe ){ ch_segmentation_cppipe = file(params.segmentation_cppipe, checkIfExists: true) } else { exit 1, "CellProfiler segmentation cppipe file not specified!" }
-if( !params.skipIlastik) {
-    if( params.ilastik_training_ilp ){ ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
+if( params.metadata )             { ch_metadata = file(params.metadata, checkIfExists: true) }                         else { exit 1, "Metadata csv file not specified!" }
+if( params.full_stack_cppipe )    { ch_full_stack_cppipe = file(params.full_stack_cppipe, checkIfExists: true) }       else { exit 1, "CellProfiler full stack cppipe file not specified!" }
+if( params.ilastik_stack_cppipe ) { ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe, checkIfExists: true) } else { exit 1, "Ilastik stack cppipe file not specified!" }
+if( params.segmentation_cppipe )  { ch_segmentation_cppipe = file(params.segmentation_cppipe, checkIfExists: true) }   else { exit 1, "CellProfiler segmentation cppipe file not specified!" }
+if( params.compensation_tiff )    { ch_compensation_tiff = file(params.compensation_tiff, checkIfExists: true) }       else { ch_compensation_tiff = false }
+if( !params.skipIlastik)          {
+    if( params.ilastik_training_ilp ){
+                                    ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
 }
 
 // Plugins required for CellProfiler
@@ -122,11 +125,12 @@ if( workflow.profile == 'awsbatch') {
 log.info nfcoreHeader()
 def summary = [:]
 summary['Run Name']                     = custom_runName ?: workflow.runName
-summary['MCD Files']                    = params.mcd
+summary['Input Files']                  = params.input
 summary['Metadata File']                = params.metadata
 summary['Full Stack cppipe File']       = params.full_stack_cppipe
 summary['Ilastik Stack cppipe File']    = params.ilastik_stack_cppipe
 summary['Skip Ilastik Step']            = params.skipIlastik ? 'Yes' : 'No'
+if(params.compensation_tiff) summary['Compensation Tiff']    = params.compensation_tiff
 if(!params.skipIlastik) summary['Ilastik Training ilp File'] = params.ilastik_training_ilp
 summary['Segmentation cppipe File']     = params.segmentation_cppipe
 summary['Imctools Container']           = params.imctools_container
@@ -183,6 +187,7 @@ process imctools {
     output:
     set val(name), file("*/full_stack/*") into ch_full_stack_tiff
     set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
+    //file "*.csv" into ch_mcd_sampleinfo
     file "*version.txt" into ch_imctools_version
 
     script: // This script is bundled with the pipeline, in nf-core/imcyto/bin/
@@ -239,6 +244,7 @@ process preprocessFullStack {
     input:
     set val(name), val(roi), file(tiff) from ch_full_stack_tiff
     file cppipe from ch_full_stack_cppipe
+    //file compensation from ch_compensation_tiff
     file plugin_dir from ch_preprocess_full_stack_plugin.collect()
 
     output:
