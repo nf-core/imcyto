@@ -9,7 +9,6 @@
 ----------------------------------------------------------------------------------------
 */
 
-
 def helpMessage() {
     // TODO nf-core: Add to this help message with new command line parameters
     log.info nfcoreHeader()
@@ -18,21 +17,22 @@ def helpMessage() {
     Usage:
 
     The typical command for running the pipeline is as follows:
-    nextflow run nf-core/imcyto --mcd '*.mcd'--metadata metadata.csv --full_stack_cppipe full_stack.cppipe --ilastik_stack_cppipe ilastik_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
+    nextflow run nf-core/imcyto --input '*.mcd'--metadata metadata.csv --full_stack_cppipe full_stack.cppipe --ilastik_stack_cppipe ilastik_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
 
     Mandatory arguments:
-      --mcd                         Path to input Mass Cytometery Data file(s) (must be surrounded with quotes)
+      --input                       Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd, *.txt and *.tiff
       --metadata                    Path to metadata csv file indicating which images to merge in full stack and/or ilastik stack
       --full_stack_cppipe           CellProfiler pipeline file required to create full stack (*.cppipe format)
       --ilastik_stack_cppipe        CellProfiler pipeline file required to create Ilastik stack (*.cppipe format)
       --segmentation_cppipe         CellProfiler pipeline file required for segmentation (*.cppipe format)
       -profile                      Configuration profile to use. Can use multiple (comma separated)
-                                    Available: conda, docker, singularity, awsbatch, test and more.
+                                    Available: docker, singularity, awsbatch, test and more.
 
     Other options:
       --ilastik_training_ilp        Paramter file required by Ilastik (*.ilp format)
-      --skipIlastik                 Skip Ilastik processing step
       --plugins                     Directory with plugin files required for CellProfiler. Default: assets/plugins
+      --compensation_tiff           Tiff file for compensation analysis during CellProfiler preprocessing steps
+      --skipIlastik                 Skip Ilastik processing step
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -72,30 +72,46 @@ ch_output_docs = file("$baseDir/docs/output.md")
 ////////////////////////////////////////////////////
 
 /*
- * Create a channel for input Mass Cytometry Data (mcd) files
+ * Create a channel for input files
  */
-if( params.mcd ){
-    ch_mcd = Channel
-        .fromPath(params.mcd, checkIfExists: true)
+if( params.input ){
+    Channel
+        .fromPath(params.input, checkIfExists: true)
         .map { it -> [ it.name.take(it.name.lastIndexOf('.')), it ] }
-        .ifEmpty { exit 1, "MCD file not found: ${params.mcd}" }
+        .ifEmpty { exit 1, "Input file not found: ${params.input}" }
+        .set { ch_mcd }
 } else {
-   exit 1, "MCD file not specified!"
+   exit 1, "Input file not specified!"
 }
 
-if( params.metadata ){ ch_metadata = file(params.metadata, checkIfExists: true) } else { exit 1, "Metadata csv file not specified!" }
-if( params.full_stack_cppipe ){ ch_full_stack_cppipe = file(params.full_stack_cppipe, checkIfExists: true) } else { exit 1, "CellProfiler full stack cppipe file not specified!" }
-if( params.ilastik_stack_cppipe ){ ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe, checkIfExists: true) } else { exit 1, "Ilastik stack cppipe file not specified!" }
-if( params.segmentation_cppipe ){ ch_segmentation_cppipe = file(params.segmentation_cppipe, checkIfExists: true) } else { exit 1, "CellProfiler segmentation cppipe file not specified!" }
-if( !params.skipIlastik) {
-    if( params.ilastik_training_ilp ){ ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
+if( params.metadata )             { ch_metadata = file(params.metadata, checkIfExists: true) }                         else { exit 1, "Metadata csv file not specified!" }
+if( params.full_stack_cppipe )    { ch_full_stack_cppipe = file(params.full_stack_cppipe, checkIfExists: true) }       else { exit 1, "CellProfiler full stack cppipe file not specified!" }
+if( params.ilastik_stack_cppipe ) { ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe, checkIfExists: true) } else { exit 1, "Ilastik stack cppipe file not specified!" }
+if( params.segmentation_cppipe )  { ch_segmentation_cppipe = file(params.segmentation_cppipe, checkIfExists: true) }   else { exit 1, "CellProfiler segmentation cppipe file not specified!" }
+
+if( !params.skipIlastik )          {
+    if( params.ilastik_training_ilp ){
+                                    ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
+}
+
+if( params.compensation_tiff )    {
+  Channel
+      .fromPath(params.compensation_tiff, checkIfExists: true)
+      .into { ch_compensation_full_stack;
+              ch_compensation_ilastik_stack }
+} else {
+    Channel
+        .empty()
+        .into { ch_compensation_full_stack;
+                ch_compensation_ilastik_stack }
 }
 
 // Plugins required for CellProfiler
-Channel.fromPath(params.plugins, checkIfExists: true)
-       .into { ch_preprocess_full_stack_plugin;
-               ch_preprocess_ilastik_stack_plugin;
-               ch_segmentation_plugin }
+Channel
+    .fromPath(params.plugins, checkIfExists: true)
+    .into { ch_preprocess_full_stack_plugin;
+            ch_preprocess_ilastik_stack_plugin;
+            ch_segmentation_plugin }
 
 ////////////////////////////////////////////////////
 /* --                   AWS                    -- */
@@ -123,11 +139,12 @@ if( workflow.profile == 'awsbatch') {
 log.info nfcoreHeader()
 def summary = [:]
 summary['Run Name']                     = custom_runName ?: workflow.runName
-summary['MCD Files']                    = params.mcd
+summary['Input Files']                  = params.input
 summary['Metadata File']                = params.metadata
 summary['Full Stack cppipe File']       = params.full_stack_cppipe
 summary['Ilastik Stack cppipe File']    = params.ilastik_stack_cppipe
 summary['Skip Ilastik Step']            = params.skipIlastik ? 'Yes' : 'No'
+if(params.compensation_tiff) summary['Compensation Tiff']    = params.compensation_tiff
 if(!params.skipIlastik) summary['Ilastik Training ilp File'] = params.ilastik_training_ilp
 summary['Segmentation cppipe File']     = params.segmentation_cppipe
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
@@ -166,7 +183,12 @@ checkHostname()
 process imctools {
     tag "$name"
     label 'process_medium'
-    publishDir "${params.outdir}/imctools/${name}", mode: 'copy'
+    container = 'quay.io/biocontainers/imctools:0.2--py_0'
+    publishDir "${params.outdir}/imctools/${name}", mode: 'copy',
+        saveAs: {filename ->
+            if (filename.indexOf("version.txt") > 0) null
+            else filename
+        }
 
     input:
     set val(name), file(mcd) from ch_mcd
@@ -175,10 +197,13 @@ process imctools {
     output:
     set val(name), file("*/full_stack/*") into ch_full_stack_tiff
     set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
+    file "*.csv" into ch_mcd_sampleinfo
+    file "*version.txt" into ch_imctools_version
 
     script: // This script is bundled with the pipeline, in nf-core/imcyto/bin/
     """
     run_imctools.py $mcd $metadata
+    pip show imctools | grep "Version" > imctools_version.txt
     """
 }
 
@@ -198,20 +223,22 @@ def flatten_tiff(ArrayList channel) {
 }
 
 // Group full stack files by sample and roi_id
-ch_full_stack_tiff.map { flatten_tiff(it) }
-                  .flatten()
-                  .collate(3)
-                  .groupTuple(by: [0,1])
-                  .map { it -> [ it[0], it[1], it[2].sort() ] }
-                  .set { ch_full_stack_tiff }
+ch_full_stack_tiff
+    .map { flatten_tiff(it) }
+    .flatten()
+    .collate(3)
+    .groupTuple(by: [0,1])
+    .map { it -> [ it[0], it[1], it[2].sort() ] }
+    .set { ch_full_stack_tiff }
 
 // Group ilastik stack files by sample and roi_id
-ch_ilastik_stack_tiff.map { flatten_tiff(it) }
-                     .flatten()
-                     .collate(3)
-                     .groupTuple(by: [0,1])
-                     .map { it -> [ it[0], it[1], it[2].sort() ] }
-                     .set { ch_ilastik_stack_tiff }
+ch_ilastik_stack_tiff
+    .map { flatten_tiff(it) }
+    .flatten()
+    .collate(3)
+    .groupTuple(by: [0,1])
+    .map { it -> [ it[0], it[1], it[2].sort() ] }
+    .set { ch_ilastik_stack_tiff }
 
 /*
 * STEP 2 - PREPROCESS FULL STACK IMAGES WITH CELLPROFILER
@@ -219,15 +246,22 @@ ch_ilastik_stack_tiff.map { flatten_tiff(it) }
 process preprocessFullStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
+    container = 'cellprofiler/cellprofiler:3.1.8'
+    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy',
+        saveAs: {filename ->
+            if (filename.indexOf("version.txt") > 0) null
+            else filename
+        }
 
     input:
     set val(name), val(roi), file(tiff) from ch_full_stack_tiff
+    file ctiff from ch_compensation_full_stack.collect().ifEmpty([])
     file cppipe from ch_full_stack_cppipe
     file plugin_dir from ch_preprocess_full_stack_plugin.collect()
 
     output:
     set val(name), val(roi), file("full_stack/*") into ch_preprocess_full_stack_tiff
+    file "*version.txt" into ch_cellprofiler_version
 
     script:
     """
@@ -239,6 +273,8 @@ process preprocessFullStack {
                  --output-directory ./full_stack \\
                  --log-level DEBUG \\
                  --temporary-directory ./tmp
+
+    cellprofiler --version > cellprofiler_version.txt
     """
 }
 
@@ -248,10 +284,12 @@ process preprocessFullStack {
 process preprocessIlastikStack {
     tag "${name}.${roi}"
     label 'process_medium'
+    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
     set val(name), val(roi), file(tiff) from ch_ilastik_stack_tiff
+    file ctiff from ch_compensation_ilastik_stack.collect().ifEmpty([])
     file cppipe from ch_ilastik_stack_cppipe
     file plugin_dir from ch_preprocess_ilastik_stack_plugin.collect()
 
@@ -275,15 +313,21 @@ process preprocessIlastikStack {
  * STEP 4 - ILASTIK
  */
 if( params.skipIlastik ) {
-  ch_preprocess_full_stack_tiff.join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
-                            .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
-                            .set { ch_preprocess_full_stack_tiff }
+  ch_preprocess_full_stack_tiff
+      .join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
+      .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
+      .set { ch_preprocess_full_stack_tiff }
   ch_ilastik_version = []
 } else {
     process ilastik {
         tag "${name}.${roi}"
         label 'process_medium'
-        publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy'
+        container = 'ilastik/ilastik-from-binary:1.3.2b3'
+        publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy',
+            saveAs: {filename ->
+                if (filename.indexOf("version.txt") > 0) null
+                else filename
+            }
 
         input:
         set val(name), val(roi), file(tiff) from ch_preprocess_ilastik_stack_tiff
@@ -291,19 +335,20 @@ if( params.skipIlastik ) {
 
         output:
         set val(name), val(roi), file("*.tiff") into ch_ilastik_tiff
-        file "*.txt" into ch_ilastik_version
+        file "*version.txt" into ch_ilastik_version
 
         script:
         """
         cp $ilastik_training_ilp ilastik_params.ilp
-        run_ilastik.sh --headless \\
+
+        /ilastik-release/run_ilastik.sh --headless \\
                        --project=ilastik_params.ilp \\
                        --output_format="tiff sequence" \\
                        --output_filename_format=./{nickname}_{result_type}_{slice_index}.tiff \\
                        $tiff
         rm  ilastik_params.ilp
 
-        python -c "import ilastik; print(ilastik.__version__)" > v_ilastik.txt
+        /ilastik-release/bin/python -c "import ilastik; print(ilastik.__version__)" > ilastik_version.txt
         """
     }
     ch_preprocess_full_stack_tiff.join(ch_ilastik_tiff, by: [0,1])
@@ -317,6 +362,7 @@ if( params.skipIlastik ) {
 process segmentation {
     tag "${name}.${roi}"
     label 'process_big'
+    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
 
     input:
@@ -341,18 +387,11 @@ process segmentation {
     """
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                 REPORTS/DOCUMENTATION/EMAIL                         -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * STEP 6 - Output Description HTML
  */
 process output_documentation {
+    container = 'quay.io/biocontainers/r-rmarkdown:0.9.5--r3.3.2_0'
     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
     input:
@@ -371,24 +410,25 @@ process output_documentation {
  * Parse software version numbers
  */
 process get_software_versions {
+    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/pipeline_info", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf(".csv") > 0) filename
             else null
         }
 
-    //input:
-    //file txt from ch_ilastik_version.first()
+    input:
+    file imctools from ch_imctools_version.first()
+    file cellprofiler from ch_cellprofiler_version.first()
+    file ilastik from ch_ilastik_version.first()
 
     output:
     file "software_versions.csv"
 
     script:
     """
-    echo $workflow.manifest.version > v_pipeline.txt
-    echo $workflow.nextflow.version > v_nextflow.txt
-    cellprofiler --version > v_cellprofiler.txt
-    touch v_imctools.txt
+    echo $workflow.manifest.version > pipeline_version.txt
+    echo $workflow.nextflow.version > nextflow_version.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
