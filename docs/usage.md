@@ -48,7 +48,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/imcyto --mcd '*.mcd'--metadata 'metadata.csv' --full_stack_cppipe full_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
+nextflow run nf-core/imcyto --input '*.mcd'--metadata 'metadata.csv' --full_stack_cppipe full_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -86,9 +86,6 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
 
 * `awsbatch`
   * A generic configuration profile to be used with AWS Batch.
-* `conda`
-  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
-  * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `docker`
   * A generic configuration profile to be used with [Docker](http://docker.com/)
   * Pulls software from dockerhub: [`nfcore/imcyto`](http://hub.docker.com/r/nfcore/imcyto/)
