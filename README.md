@@ -14,19 +14,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 ## Pipeline summary
 
 1. Split mcd file by ROI, and save full and ilastik stacks separately based on specification in `metadata.csv` ([`imctools`](https://github.com/BodenmillerGroup/imctools))
-2. Remove outliers and apply median filter to full stack tiff files ([`CellProfiler`](https://cellprofiler.org/))
-3. Merge images from ilastik stack and save as a composite tiff ([`CellProfiler`](https://cellprofiler.org/))
+2. Apply preprocessing filters to full stack tiff files ([`CellProfiler`](https://cellprofiler.org/); `--full_stack_cppipe` parameter)
+3. Merge images from ilastik stack to obtain RGB image of cell nuclei and membranes to generate a composite tiff ([`CellProfiler`](https://cellprofiler.org/); `--ilastik_stack_cppipe` parameter)
 4. Use composite tiff to classify pixels as membrane, nuclei or background, and save probabilities map as tiff ([`Ilastik`](https://www.ilastik.org/); *optional*)
-5. Use probability tiffs and preprocessed full stack tiffs for single cell segmentation to generate a cell mask as tiff and then overlay cell mask onto full stack tiff images to extract single cell information generating a csv file ([`CellProfiler`](https://cellprofiler.org/))
-
-<!--
-1. Open mcd file and contained ROIs and save as individual tiff files matching names from metadata.csv file into corresponding folders – full_stack/ilastik_stack (IMCTools)
-2. Apply preprocessing filters to all tiff files in full_stack and save (CellProfiler - full_stack_preprocessing.cppipe)
-3. Merge tiff images from ilastik_stack to obtain RGB image of cell nuclei and membranes and save as a composite.tiff (CellProfiler - ilastik_stack_preprocessing.cppipe)
-4. Use composite.tiff to classify pixels as membrane, nuclei or background, and save probability maps as tiffs (Ilastik)
-5. Use probability tiffs and preprocessed full_stack tiffs for single cell segmentation to generate a cell mask (CellProfiler – segmentation.cppipe)
-6. Overlay cell mask onto full_stack tiff images to extract single cell information generating a csv file (CellProfiler - segmentation.cppipe)
--->
+5. Use probability tiffs and preprocessed full stack tiffs for single cell segmentation to generate a cell mask as tiff and then overlay cell mask onto full stack tiff images to extract single cell information generating a csv file ([`CellProfiler`](https://cellprofiler.org/); `--segmentation_cppipe` parameter)
 
 ## Documentation
 
