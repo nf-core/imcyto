@@ -87,7 +87,7 @@ if( params.metadata )             { ch_metadata = file(params.metadata, checkIfE
 if( params.full_stack_cppipe )    { ch_full_stack_cppipe = file(params.full_stack_cppipe, checkIfExists: true) }       else { exit 1, "CellProfiler full stack cppipe file not specified!" }
 if( params.ilastik_stack_cppipe ) { ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe, checkIfExists: true) } else { exit 1, "Ilastik stack cppipe file not specified!" }
 if( params.segmentation_cppipe )  { ch_segmentation_cppipe = file(params.segmentation_cppipe, checkIfExists: true) }   else { exit 1, "CellProfiler segmentation cppipe file not specified!" }
-if( params.compensation_tiff )    { ch_compensation_tiff = file(params.compensation_tiff, checkIfExists: true) }       else { ch_compensation_tiff = false }
+if( params.compensation_tiff )    { ch_compensation_tiff = file(params.compensation_tiff, checkIfExists: true) }       else { ch_compensation_tiff = [] }
 if( !params.skipIlastik)          {
     if( params.ilastik_training_ilp ){
                                     ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
@@ -173,7 +173,7 @@ checkHostname()
 process imctools {
     tag "$name"
     label 'process_medium'
-    container = params.imctools_container
+    container = 'quay.io/biocontainers/imctools:0.2--py_0'
     publishDir "${params.outdir}/imctools/${name}", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("version.txt") > 0) null
@@ -187,7 +187,7 @@ process imctools {
     output:
     set val(name), file("*/full_stack/*") into ch_full_stack_tiff
     set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
-    //file "*.csv" into ch_mcd_sampleinfo
+    file "*.csv" into ch_mcd_sampleinfo
     file "*version.txt" into ch_imctools_version
 
     script: // This script is bundled with the pipeline, in nf-core/imcyto/bin/
@@ -234,7 +234,7 @@ ch_ilastik_stack_tiff.map { flatten_tiff(it) }
 process preprocessFullStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    container = params.cellprofiler_container
+    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("version.txt") > 0) null
@@ -243,8 +243,8 @@ process preprocessFullStack {
 
     input:
     set val(name), val(roi), file(tiff) from ch_full_stack_tiff
+    file ctiff from ch_compensation_tiff
     file cppipe from ch_full_stack_cppipe
-    //file compensation from ch_compensation_tiff
     file plugin_dir from ch_preprocess_full_stack_plugin.collect()
 
     output:
@@ -272,11 +272,12 @@ process preprocessFullStack {
 process preprocessIlastikStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    container = params.cellprofiler_container
+    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
     set val(name), val(roi), file(tiff) from ch_ilastik_stack_tiff
+    file ctiff from ch_compensation_tiff
     file cppipe from ch_ilastik_stack_cppipe
     file plugin_dir from ch_preprocess_ilastik_stack_plugin.collect()
 
@@ -308,7 +309,7 @@ if( params.skipIlastik ) {
     process ilastik {
         tag "${name}.${roi}"
         label 'process_medium'
-        container = params.ilastik_container
+        container = 'ilastik/ilastik-from-binary:1.3.2b3'
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy',
             saveAs: {filename ->
                 if (filename.indexOf("version.txt") > 0) null
@@ -348,7 +349,7 @@ if( params.skipIlastik ) {
 process segmentation {
     tag "${name}.${roi}"
     label 'process_big'
-    container = params.cellprofiler_container
+    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
 
     input:
@@ -377,7 +378,7 @@ process segmentation {
  * STEP 6 - Output Description HTML
  */
 process output_documentation {
-    container = params.rmarkdown_container
+    container = 'quay.io/biocontainers/r-rmarkdown:0.9.5--r3.3.2_0'
     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
     input:
@@ -396,7 +397,7 @@ process output_documentation {
  * Parse software version numbers
  */
 process get_software_versions {
-    container = params.cellprofiler_container
+    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/pipeline_info", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf(".csv") > 0) filename
