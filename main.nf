@@ -75,10 +75,11 @@ ch_output_docs = file("$baseDir/docs/output.md")
  * Create a channel for input files
  */
 if( params.input ){
-    ch_mcd = Channel
+    Channel
         .fromPath(params.input, checkIfExists: true)
         .map { it -> [ it.name.take(it.name.lastIndexOf('.')), it ] }
         .ifEmpty { exit 1, "Input file not found: ${params.input}" }
+        .set { ch_mcd }
 } else {
    exit 1, "Input file not specified!"
 }
@@ -87,17 +88,30 @@ if( params.metadata )             { ch_metadata = file(params.metadata, checkIfE
 if( params.full_stack_cppipe )    { ch_full_stack_cppipe = file(params.full_stack_cppipe, checkIfExists: true) }       else { exit 1, "CellProfiler full stack cppipe file not specified!" }
 if( params.ilastik_stack_cppipe ) { ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe, checkIfExists: true) } else { exit 1, "Ilastik stack cppipe file not specified!" }
 if( params.segmentation_cppipe )  { ch_segmentation_cppipe = file(params.segmentation_cppipe, checkIfExists: true) }   else { exit 1, "CellProfiler segmentation cppipe file not specified!" }
-if( params.compensation_tiff )    { ch_compensation_tiff = file(params.compensation_tiff, checkIfExists: true) }       else { ch_compensation_tiff = [] }
-if( !params.skipIlastik)          {
+
+if( !params.skipIlastik )          {
     if( params.ilastik_training_ilp ){
                                     ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
 }
 
+if( params.compensation_tiff )    {
+  Channel
+      .fromPath(params.compensation_tiff, checkIfExists: true)
+      .into { ch_compensation_full_stack;
+              ch_compensation_ilastik_stack }
+} else {
+    Channel
+        .empty()
+        .into { ch_compensation_full_stack;
+                ch_compensation_ilastik_stack }
+}
+
 // Plugins required for CellProfiler
-Channel.fromPath(params.plugins, checkIfExists: true)
-       .into { ch_preprocess_full_stack_plugin;
-               ch_preprocess_ilastik_stack_plugin;
-               ch_segmentation_plugin }
+Channel
+    .fromPath(params.plugins, checkIfExists: true)
+    .into { ch_preprocess_full_stack_plugin;
+            ch_preprocess_ilastik_stack_plugin;
+            ch_segmentation_plugin }
 
 ////////////////////////////////////////////////////
 /* --                   AWS                    -- */
@@ -133,10 +147,6 @@ summary['Skip Ilastik Step']            = params.skipIlastik ? 'Yes' : 'No'
 if(params.compensation_tiff) summary['Compensation Tiff']    = params.compensation_tiff
 if(!params.skipIlastik) summary['Ilastik Training ilp File'] = params.ilastik_training_ilp
 summary['Segmentation cppipe File']     = params.segmentation_cppipe
-summary['Imctools Container']           = params.imctools_container
-summary['CellProfiler Container']       = params.cellprofiler_container
-summary['Ilastik Container']            = params.ilastik_container
-summary['R-markdown Container']         = params.rmarkdown_container
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Output Dir']                   = params.outdir
@@ -213,20 +223,22 @@ def flatten_tiff(ArrayList channel) {
 }
 
 // Group full stack files by sample and roi_id
-ch_full_stack_tiff.map { flatten_tiff(it) }
-                  .flatten()
-                  .collate(3)
-                  .groupTuple(by: [0,1])
-                  .map { it -> [ it[0], it[1], it[2].sort() ] }
-                  .set { ch_full_stack_tiff }
+ch_full_stack_tiff
+    .map { flatten_tiff(it) }
+    .flatten()
+    .collate(3)
+    .groupTuple(by: [0,1])
+    .map { it -> [ it[0], it[1], it[2].sort() ] }
+    .set { ch_full_stack_tiff }
 
 // Group ilastik stack files by sample and roi_id
-ch_ilastik_stack_tiff.map { flatten_tiff(it) }
-                     .flatten()
-                     .collate(3)
-                     .groupTuple(by: [0,1])
-                     .map { it -> [ it[0], it[1], it[2].sort() ] }
-                     .set { ch_ilastik_stack_tiff }
+ch_ilastik_stack_tiff
+    .map { flatten_tiff(it) }
+    .flatten()
+    .collate(3)
+    .groupTuple(by: [0,1])
+    .map { it -> [ it[0], it[1], it[2].sort() ] }
+    .set { ch_ilastik_stack_tiff }
 
 /*
 * STEP 2 - PREPROCESS FULL STACK IMAGES WITH CELLPROFILER
@@ -243,7 +255,7 @@ process preprocessFullStack {
 
     input:
     set val(name), val(roi), file(tiff) from ch_full_stack_tiff
-    file ctiff from ch_compensation_tiff
+    file ctiff from ch_compensation_full_stack.collect().ifEmpty([])
     file cppipe from ch_full_stack_cppipe
     file plugin_dir from ch_preprocess_full_stack_plugin.collect()
 
@@ -277,7 +289,7 @@ process preprocessIlastikStack {
 
     input:
     set val(name), val(roi), file(tiff) from ch_ilastik_stack_tiff
-    file ctiff from ch_compensation_tiff
+    file ctiff from ch_compensation_ilastik_stack.collect().ifEmpty([])
     file cppipe from ch_ilastik_stack_cppipe
     file plugin_dir from ch_preprocess_ilastik_stack_plugin.collect()
 
@@ -301,9 +313,10 @@ process preprocessIlastikStack {
  * STEP 4 - ILASTIK
  */
 if( params.skipIlastik ) {
-  ch_preprocess_full_stack_tiff.join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
-                            .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
-                            .set { ch_preprocess_full_stack_tiff }
+  ch_preprocess_full_stack_tiff
+      .join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
+      .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
+      .set { ch_preprocess_full_stack_tiff }
   ch_ilastik_version = []
 } else {
     process ilastik {
