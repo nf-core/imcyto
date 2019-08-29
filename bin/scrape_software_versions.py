@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 from __future__ import print_function
 from collections import OrderedDict
+import os
 import re
 
-# TODO nf-core: Add additional regexes for new tools in process get_software_versions
 regexes = {
     'nf-core/imcyto': ['pipeline_version.txt', r"(\S+)"],
     'Nextflow': ['nextflow_version.txt', r"(\S+)"],
     'imctools': ['imctools_version.txt', r"Version: (\S+)"],
     'CellProfiler': ['cellprofiler_version.txt', r"(\S+)"],
-    'Ilastik': ['ilastik_version.txt', r"(\S+)"]
+    'Ilastik' : ['ilastik_version.txt', r"(\S+)"]
 }
 
 results = OrderedDict()
@@ -21,11 +21,14 @@ results['Ilastik'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
-    with open(v[0]) as x:
-        versions = x.read()
-        match = re.search(v[1], versions)
-        if match:
-            results[k] = "v{}".format(match.group(1))
+    if os.path.exists(v[0]):
+        with open(v[0]) as x:
+            versions = x.read()
+            match = re.search(v[1], versions)
+            if match:
+                results[k] = "v{}".format(match.group(1))
+    else:
+        results[k] = False
 
 # Remove software set to false in results
 for k in results:
