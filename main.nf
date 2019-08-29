@@ -317,7 +317,7 @@ if( params.skipIlastik ) {
       .join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
       .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
       .set { ch_preprocess_full_stack_tiff }
-  ch_ilastik_version = []
+  ch_ilastik_version = Channel.empty()
 } else {
     process ilastik {
         tag "${name}.${roi}"
@@ -420,7 +420,7 @@ process get_software_versions {
     input:
     file imctools from ch_imctools_version.first()
     file cellprofiler from ch_cellprofiler_version.first()
-    file ilastik from ch_ilastik_version.first()
+    file ilastik from ch_ilastik_version.first().ifEmpty([])
 
     output:
     file "software_versions.csv"
