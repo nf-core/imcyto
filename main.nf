@@ -10,7 +10,6 @@
 */
 
 def helpMessage() {
-    // TODO nf-core: Add to this help message with new command line parameters
     log.info nfcoreHeader()
     log.info"""
 
@@ -183,7 +182,6 @@ checkHostname()
 process imctools {
     tag "$name"
     label 'process_medium'
-    container = 'quay.io/biocontainers/imctools:0.2--py_0'
     publishDir "${params.outdir}/imctools/${name}", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("version.txt") > 0) null
@@ -246,7 +244,6 @@ ch_ilastik_stack_tiff
 process preprocessFullStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("version.txt") > 0) null
@@ -284,7 +281,6 @@ process preprocessFullStack {
 process preprocessIlastikStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
@@ -322,7 +318,6 @@ if( params.skipIlastik ) {
     process ilastik {
         tag "${name}.${roi}"
         label 'process_medium'
-        container = 'ilastik/ilastik-from-binary:1.3.2b3'
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy',
             saveAs: {filename ->
                 if (filename.indexOf("version.txt") > 0) null
@@ -362,7 +357,6 @@ if( params.skipIlastik ) {
 process segmentation {
     tag "${name}.${roi}"
     label 'process_big'
-    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
 
     input:
@@ -391,7 +385,6 @@ process segmentation {
  * STEP 6 - Output Description HTML
  */
 process output_documentation {
-    container = 'quay.io/biocontainers/r-rmarkdown:0.9.5--r3.3.2_0'
     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
     input:
@@ -410,7 +403,6 @@ process output_documentation {
  * Parse software version numbers
  */
 process get_software_versions {
-    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/pipeline_info", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf(".csv") > 0) filename
