@@ -10,7 +10,6 @@
 */
 
 def helpMessage() {
-    // TODO nf-core: Add to this help message with new command line parameters
     log.info nfcoreHeader()
     log.info"""
 
@@ -43,14 +42,6 @@ def helpMessage() {
     """.stripIndent()
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                SET UP CONFIGURATION VARIABLES                       -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 // Show help message
 if (params.help){
     helpMessage()
@@ -67,12 +58,8 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
 // Stage config files
 ch_output_docs = file("$baseDir/docs/output.md")
 
-////////////////////////////////////////////////////
-/* --          VALIDATE INPUTS                 -- */
-////////////////////////////////////////////////////
-
 /*
- * Create a channel for input files
+ * Validate inputs
  */
 if( params.input ){
     Channel
@@ -89,16 +76,16 @@ if( params.full_stack_cppipe )    { ch_full_stack_cppipe = file(params.full_stac
 if( params.ilastik_stack_cppipe ) { ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe, checkIfExists: true) } else { exit 1, "Ilastik stack cppipe file not specified!" }
 if( params.segmentation_cppipe )  { ch_segmentation_cppipe = file(params.segmentation_cppipe, checkIfExists: true) }   else { exit 1, "CellProfiler segmentation cppipe file not specified!" }
 
-if( !params.skipIlastik )          {
+if( !params.skipIlastik ) {
     if( params.ilastik_training_ilp ){
-                                    ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
+        ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
 }
 
-if( params.compensation_tiff )    {
-  Channel
-      .fromPath(params.compensation_tiff, checkIfExists: true)
-      .into { ch_compensation_full_stack;
-              ch_compensation_ilastik_stack }
+if( params.compensation_tiff ) {
+    Channel
+        .fromPath(params.compensation_tiff, checkIfExists: true)
+        .into { ch_compensation_full_stack;
+                ch_compensation_ilastik_stack }
 } else {
     Channel
         .empty()
@@ -113,10 +100,7 @@ Channel
             ch_preprocess_ilastik_stack_plugin;
             ch_segmentation_plugin }
 
-////////////////////////////////////////////////////
-/* --                   AWS                    -- */
-////////////////////////////////////////////////////
-
+// AWS Batch settings
 if( workflow.profile == 'awsbatch') {
   // AWSBatch sanity checking
   if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
@@ -126,14 +110,6 @@ if( workflow.profile == 'awsbatch') {
   // Prevent trace files to be stored on S3 since S3 does not support rolling files.
   if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                       HEADER LOG INFO                               -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 
 // Header log info
 log.info nfcoreHeader()
@@ -169,21 +145,12 @@ log.info "\033[2m----------------------------------------------------\033[0m"
 // Check the hostnames against configured profiles
 checkHostname()
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                           MAIN PIPELINE                             -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * STEP 1 - IMCTOOLS
  */
 process imctools {
     tag "$name"
     label 'process_medium'
-    container = 'quay.io/biocontainers/imctools:0.2--py_0'
     publishDir "${params.outdir}/imctools/${name}", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("version.txt") > 0) null
@@ -246,7 +213,6 @@ ch_ilastik_stack_tiff
 process preprocessFullStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("version.txt") > 0) null
@@ -284,7 +250,6 @@ process preprocessFullStack {
 process preprocessIlastikStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
 
     input:
@@ -313,16 +278,15 @@ process preprocessIlastikStack {
  * STEP 4 - ILASTIK
  */
 if( params.skipIlastik ) {
-  ch_preprocess_full_stack_tiff
-      .join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
-      .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
-      .set { ch_preprocess_full_stack_tiff }
-  ch_ilastik_version = Channel.empty()
+    ch_preprocess_full_stack_tiff
+        .join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
+        .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
+        .set { ch_preprocess_full_stack_tiff }
+    ch_ilastik_version = Channel.empty()
 } else {
     process ilastik {
         tag "${name}.${roi}"
         label 'process_medium'
-        container = 'ilastik/ilastik-from-binary:1.3.2b3'
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy',
             saveAs: {filename ->
                 if (filename.indexOf("version.txt") > 0) null
@@ -352,8 +316,8 @@ if( params.skipIlastik ) {
         """
     }
     ch_preprocess_full_stack_tiff.join(ch_ilastik_tiff, by: [0,1])
-                            .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
-                            .set { ch_preprocess_full_stack_tiff }
+                                 .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
+                                 .set { ch_preprocess_full_stack_tiff }
 }
 
 /*
@@ -362,7 +326,6 @@ if( params.skipIlastik ) {
 process segmentation {
     tag "${name}.${roi}"
     label 'process_big'
-    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
 
     input:
@@ -391,7 +354,6 @@ process segmentation {
  * STEP 6 - Output Description HTML
  */
 process output_documentation {
-    container = 'quay.io/biocontainers/r-rmarkdown:0.9.5--r3.3.2_0'
     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
     input:
@@ -410,7 +372,6 @@ process output_documentation {
  * Parse software version numbers
  */
 process get_software_versions {
-    container = 'cellprofiler/cellprofiler:3.1.8'
     publishDir "${params.outdir}/pipeline_info", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf(".csv") > 0) filename
@@ -528,14 +489,6 @@ workflow.onComplete {
 
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                       NF-CORE HEADER                                -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 def nfcoreHeader(){
     // Log colors ANSI codes
     c_reset = params.monochrome_logs ? '' : "\033[0m";
@@ -559,14 +512,6 @@ def nfcoreHeader(){
     """.stripIndent()
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                       HOSTNAME CHECK                                -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 def checkHostname(){
     def c_reset = params.monochrome_logs ? '' : "\033[0m"
     def c_white = params.monochrome_logs ? '' : "\033[0;37m"
@@ -587,11 +532,3 @@ def checkHostname(){
         }
     }
 }
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                        END OF PIPELINE                              -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
