@@ -152,7 +152,7 @@ checkHostname()
 /*
  * STEP 1 - IMCTOOLS
  */
-process imctools {
+process IMCTools {
     tag "$name"
     label 'process_medium'
     publishDir "${params.outdir}/imctools/${name}", mode: 'copy',
@@ -214,7 +214,7 @@ ch_ilastik_stack_tiff
 /*
 * STEP 2 - PREPROCESS FULL STACK IMAGES WITH CELLPROFILER
 */
-process preprocessFullStack {
+process PreprocessFullStack {
     tag "${name}.${roi}"
     label 'process_medium'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy',
@@ -236,13 +236,14 @@ process preprocessFullStack {
     script:
     """
     export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
-    cellprofiler --run-headless \\
-                 --pipeline $cppipe \\
-                 --image-directory ./ \\
-                 --plugins-directory ./${plugin_dir} \\
-                 --output-directory ./full_stack \\
-                 --log-level DEBUG \\
-                 --temporary-directory ./tmp
+    cellprofiler \\
+        --run-headless \\
+        --pipeline $cppipe \\
+        --image-directory ./ \\
+        --plugins-directory ./${plugin_dir} \\
+        --output-directory ./full_stack \\
+        --log-level DEBUG \\
+        --temporary-directory ./tmp
 
     cellprofiler --version > cellprofiler_version.txt
     """
@@ -251,7 +252,7 @@ process preprocessFullStack {
 /*
 * STEP 3 - PREPROCESS ILASTIK STACK IMAGES WITH CELLPROFILER
 */
-process preprocessIlastikStack {
+process PreprocessIlastikStack {
     tag "${name}.${roi}"
     label 'process_medium'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
@@ -268,13 +269,14 @@ process preprocessIlastikStack {
     script:
     """
     export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
-    cellprofiler --run-headless \\
-                 --pipeline $cppipe \\
-                 --image-directory ./ \\
-                 --plugins-directory ./${plugin_dir} \\
-                 --output-directory ./ilastik_stack \\
-                 --log-level DEBUG \\
-                 --temporary-directory ./tmp
+    cellprofiler \\
+        --run-headless \\
+        --pipeline $cppipe \\
+        --image-directory ./ \\
+        --plugins-directory ./${plugin_dir} \\
+        --output-directory ./ilastik_stack \\
+        --log-level DEBUG \\
+        --temporary-directory ./tmp
     """
 }
 
@@ -288,7 +290,7 @@ if (params.skipIlastik) {
         .set { ch_preprocess_full_stack_tiff }
     ch_ilastik_version = Channel.empty()
 } else {
-    process ilastik {
+    process Ilastik {
         tag "${name}.${roi}"
         label 'process_medium'
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy',
@@ -309,25 +311,29 @@ if (params.skipIlastik) {
         """
         cp $ilastik_training_ilp ilastik_params.ilp
 
-        /ilastik-release/run_ilastik.sh --headless \\
-                       --project=ilastik_params.ilp \\
-                       --output_format="tiff sequence" \\
-                       --output_filename_format=./{nickname}_{result_type}_{slice_index}.tiff \\
-                       $tiff
+        /ilastik-release/run_ilastik.sh \\
+            --headless \\
+            --project=ilastik_params.ilp \\
+            --output_format="tiff sequence" \\
+            --output_filename_format=./{nickname}_{result_type}_{slice_index}.tiff \\
+            --logfile ./ilastik_log.txt \\
+            $tiff
         rm  ilastik_params.ilp
 
         /ilastik-release/bin/python -c "import ilastik; print(ilastik.__version__)" > ilastik_version.txt
         """
     }
-    ch_preprocess_full_stack_tiff.join(ch_ilastik_tiff, by: [0,1])
-                                 .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
-                                 .set { ch_preprocess_full_stack_tiff }
+
+    ch_preprocess_full_stack_tiff
+        .join(ch_ilastik_tiff, by: [0,1])
+        .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
+        .set { ch_preprocess_full_stack_tiff }
 }
 
 /*
  * STEP 5 - SEGMENTATION WITH CELLPROFILER
  */
-process segmentation {
+process Segmentation {
     tag "${name}.${roi}"
     label 'process_high'
     publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
@@ -344,13 +350,14 @@ process segmentation {
     script:
     """
     export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
-    cellprofiler --run-headless \\
-                 --pipeline $cppipe \\
-                 --image-directory ./ \\
-                 --plugins-directory ./${plugin_dir} \\
-                 --output-directory ./ \\
-                 --log-level DEBUG \\
-                 --temporary-directory ./tmp
+    cellprofiler \\
+        --run-headless \\
+        --pipeline $cppipe \\
+        --image-directory ./ \\
+        --plugins-directory ./${plugin_dir} \\
+        --output-directory ./ \\
+        --log-level DEBUG \\
+        --temporary-directory ./tmp
     """
 }
 
