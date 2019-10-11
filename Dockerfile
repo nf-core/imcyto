@@ -1,4 +1,4 @@
-FROM nfcore/base
+FROM nfcore/base:1.7
 LABEL authors="Harshil Patel" \
       description="Docker image containing majority of requirements for nf-core/imcyto pipeline"
 
