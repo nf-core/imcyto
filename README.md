@@ -35,7 +35,14 @@ iv. Start running your own analysis!
 
 <!-- TODO nf-core: Update the default command above used to run the pipeline -->
 ```bash
-nextflow run nf-core/imcyto -profile <docker/singularity>
+nextflow run nf-core/imcyto \
+    --input "./mcd/*.mcd" \
+    --metadata 'metadata.csv' \
+    --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
+    --segmentation_cppipe './plugins/segmentation.cppipe' \
+    --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
+    --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+    -profile <docker/singularity>
 ```
 
 See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
