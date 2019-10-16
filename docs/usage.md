@@ -11,6 +11,15 @@
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
   * [`-profile`](#-profile)
+  * [`--input`](#--input)
+  * [`--metadata`](#--metadata)
+  * [`--full_stack_cppipe`](#--full_stack_cppipe)
+  * [`--ilastik_stack_cppipe`](#--ilastik_stack_cppipe)
+  * [`--segmentation_cppipe`](#--segmentation_cppipe)
+  * [`--ilastik_training_ilp`](#--ilastik_training_ilp)
+  * [`--compensation_tiff`](#--compensation_tiff)
+  * [`--skip_ilastik`](#--skip_ilastik)
+  * [`--plugins`](#--plugins)
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -43,13 +52,18 @@ It is recommended to limit the Nextflow Java virtual machines memory. We recomme
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
-<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
-
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/imcyto --input '*.mcd'--metadata 'metadata.csv' --full_stack_cppipe full_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
+nextflow run nf-core/imcyto \
+    --input "./mcd/*.mcd" \
+    --metadata 'metadata.csv' \
+    --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
+    --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
+    --segmentation_cppipe './plugins/segmentation.cppipe' \
+    --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+    -profile <docker/singularity>
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -77,7 +91,6 @@ First, go to the [nf-core/imcyto releases page](https://github.com/nf-core/imcyt
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
-
 ## Main arguments
 
 ### `-profile`
@@ -99,10 +112,67 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
 
 <!-- TODO nf-core: Document required command line parameters -->
 
-### `--skipIlastik`
+### `--input`
+Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are `*.mcd`.
 
+```bash
+--input "./mcd/*.mcd"
+```
 
+### `--metadata`
 
+Path to metadata `csv` file indicating which images to merge in full stack and/or Ilastik stack.
+
+```bash
+--metadata 'metadata.csv'
+```
+
+### `--full_stack_cppipe`
+Path to CellProfiler pipeline file required to create full stack (`cppipe` format).
+
+```bash
+--full_stack_cppipe './plugins/full_stack_preprocessing.cppipe'
+```
+
+### `--ilastik_stack_cppipe`
+Path to CellProfiler pipeline file required to create Ilastik stack (`cppipe` format).
+
+```bash
+--ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe'
+```
+
+### `--segmentation_cppipe`
+Path to CellProfiler pipeline file required for segmentation (`cppipe` format).
+
+```bash
+--segmentation_cppipe './plugins/segmentation.cppipe'
+```
+
+### `--ilastik_training_ilp`
+Path to parameter file required by Ilastik (`ilp` format).
+
+```bash
+--ilastik_training_ilp './plugins/ilastik_training_params.ilp'
+```
+
+### `--compensation_tiff`
+Path to `tiff` file for compensation analysis during CellProfiler preprocessing steps.
+
+```bash
+--compensation_tiff './tiff/compensation.tiff'
+```
+
+### `--skip_ilastik`
+Flag to skip Ilastik processing step.
+
+### `--plugins`
+Path to directory with plugin files required for CellProfiler.
+
+```bash
+--plugins './cellprofiler/plugins/'
+```
+
+Default: `assets/plugins`
 
 ## Job resources
 ### Automatic resubmission
@@ -125,8 +195,6 @@ The AWS region to run your job in. Default is set to `eu-west-1` but can be adju
 Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
 
 ## Other command line parameters
-
-<!-- TODO nf-core: Describe any other command line flags here -->
 
 ### `--outdir`
 The output directory where the results will be saved.

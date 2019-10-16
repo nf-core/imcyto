@@ -5,9 +5,8 @@ import sys
 import argparse
 
 import imctools.io.mcdparser as mcdparser
-import imctools.io.txtparser as txtparser
-import imctools.io.ometiffparser as omeparser
-import imctools.io.mcdxmlparser as meta
+#import imctools.io.txtparser as txtparser
+#import imctools.io.ometiffparser as omeparser
 
 ############################################
 ############################################
