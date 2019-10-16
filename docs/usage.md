@@ -43,13 +43,18 @@ It is recommended to limit the Nextflow Java virtual machines memory. We recomme
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
-<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
-
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/imcyto --input '*.mcd'--metadata 'metadata.csv' --full_stack_cppipe full_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
+nextflow run nf-core/imcyto \
+    --input "./mcd/*.mcd" \
+    --metadata 'metadata.csv' \
+    --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
+    --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
+    --segmentation_cppipe './plugins/segmentation.cppipe' \
+    --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+    -profile <docker/singularity>
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -77,7 +82,6 @@ First, go to the [nf-core/imcyto releases page](https://github.com/nf-core/imcyt
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
-
 ## Main arguments
 
 ### `-profile`
@@ -99,9 +103,9 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
 
 <!-- TODO nf-core: Document required command line parameters -->
 
-### `--skipIlastik`
+### `--skip_ilastik`
 
-
+Skip Ilastik processing steps
 
 
 ## Job resources
