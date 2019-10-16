@@ -115,29 +115,64 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
 ### `--input`
 Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are `*.mcd`.
 
+```bash
+--input "./mcd/*.mcd"
+```
+
 ### `--metadata`
+
 Path to metadata `csv` file indicating which images to merge in full stack and/or Ilastik stack.
+
+```bash
+--metadata 'metadata.csv'
+```
 
 ### `--full_stack_cppipe`
 Path to CellProfiler pipeline file required to create full stack (`cppipe` format).
 
+```bash
+--full_stack_cppipe './plugins/full_stack_preprocessing.cppipe'
+```
+
 ### `--ilastik_stack_cppipe`
-Path to CellProfiler pipeline file required to create Ilastik stack (`cppipe` format)
+Path to CellProfiler pipeline file required to create Ilastik stack (`cppipe` format).
+
+```bash
+--ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe'
+```
 
 ### `--segmentation_cppipe`
 Path to CellProfiler pipeline file required for segmentation (`cppipe` format).
 
+```bash
+--segmentation_cppipe './plugins/segmentation.cppipe'
+```
+
 ### `--ilastik_training_ilp`
 Path to parameter file required by Ilastik (`ilp` format).
 
+```bash
+--ilastik_training_ilp './plugins/ilastik_training_params.ilp'
+```
+
 ### `--compensation_tiff`
 Path to `tiff` file for compensation analysis during CellProfiler preprocessing steps.
+
+```bash
+--compensation_tiff './tiff/compensation.tiff'
+```
 
 ### `--skip_ilastik`
 Flag to skip Ilastik processing step.
 
 ### `--plugins`
-Path to directory with plugin files required for CellProfiler. Default: `assets/plugins`.
+Path to directory with plugin files required for CellProfiler.
+
+```bash
+--plugins './cellprofiler/plugins/'
+```
+
+Default: `assets/plugins`
 
 ## Job resources
 ### Automatic resubmission
