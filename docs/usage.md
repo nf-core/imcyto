@@ -11,6 +11,15 @@
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
   * [`-profile`](#-profile)
+  * [`--input`](#--input)
+  * [`--metadata`](#--metadata)
+  * [`--full_stack_cppipe`](#--full_stack_cppipe)
+  * [`--ilastik_stack_cppipe`](#--ilastik_stack_cppipe)
+  * [`--segmentation_cppipe`](#--segmentation_cppipe)
+  * [`--ilastik_training_ilp`](#--ilastik_training_ilp)
+  * [`--compensation_tiff`](#--compensation_tiff)
+  * [`--skip_ilastik`](#--skip_ilastik)
+  * [`--plugins`](#--plugins)
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -103,10 +112,32 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
 
 <!-- TODO nf-core: Document required command line parameters -->
 
+### `--input`
+Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are `*.mcd`.
+
+### `--metadata`
+Path to metadata `csv` file indicating which images to merge in full stack and/or Ilastik stack.
+
+### `--full_stack_cppipe`
+Path to CellProfiler pipeline file required to create full stack (`cppipe` format).
+
+### `--ilastik_stack_cppipe`
+Path to CellProfiler pipeline file required to create Ilastik stack (`cppipe` format)
+
+### `--segmentation_cppipe`
+Path to CellProfiler pipeline file required for segmentation (`cppipe` format).
+
+### `--ilastik_training_ilp`
+Path to parameter file required by Ilastik (`ilp` format).
+
+### `--compensation_tiff`
+Path to `tiff` file for compensation analysis during CellProfiler preprocessing steps.
+
 ### `--skip_ilastik`
+Flag to skip Ilastik processing step.
 
-Skip Ilastik processing steps
-
+### `--plugins`
+Path to directory with plugin files required for CellProfiler. Default: `assets/plugins`.
 
 ## Job resources
 ### Automatic resubmission
@@ -129,8 +160,6 @@ The AWS region to run your job in. Default is set to `eu-west-1` but can be adju
 Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
 
 ## Other command line parameters
-
-<!-- TODO nf-core: Describe any other command line flags here -->
 
 ### `--outdir`
 The output directory where the results will be saved.
