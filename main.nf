@@ -16,35 +16,42 @@ def helpMessage() {
     Usage:
 
     The typical command for running the pipeline is as follows:
-    nextflow run nf-core/imcyto --input '*.mcd'--metadata metadata.csv --full_stack_cppipe full_stack.cppipe --ilastik_stack_cppipe ilastik_stack.cppipe --segmentation_cppipe segmentation.cppipe -profile docker
+    nextflow run nf-core/imcyto \
+        --input "./mcd/*.mcd" \
+        --metadata 'metadata.csv' \
+        --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
+        --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
+        --segmentation_cppipe './plugins/segmentation.cppipe' \
+        --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+        -profile docker
 
     Mandatory arguments:
-      --input                       Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd, *.txt and *.tiff
-      --metadata                    Path to metadata csv file indicating which images to merge in full stack and/or ilastik stack
-      --full_stack_cppipe           CellProfiler pipeline file required to create full stack (*.cppipe format)
-      --ilastik_stack_cppipe        CellProfiler pipeline file required to create Ilastik stack (*.cppipe format)
-      --segmentation_cppipe         CellProfiler pipeline file required for segmentation (*.cppipe format)
-      -profile                      Configuration profile to use. Can use multiple (comma separated)
-                                    Available: docker, singularity, awsbatch, test and more.
+      --input [path]                  Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd, *.txt and *.tiff
+      --metadata [path]               Path to metadata csv file indicating which images to merge in full stack and/or ilastik stack
+      --full_stack_cppipe [path]      CellProfiler pipeline file required to create full stack (*.cppipe format)
+      --ilastik_stack_cppipe [path]   CellProfiler pipeline file required to create Ilastik stack (*.cppipe format)
+      --segmentation_cppipe [path]    CellProfiler pipeline file required for segmentation (*.cppipe format)
+      -profile [str]                  Configuration profile to use. Can use multiple (comma separated)
+                                      Available: docker, singularity, awsbatch, test and more.
 
     Other options:
-      --ilastik_training_ilp        Paramter file required by Ilastik (*.ilp format)
-      --plugins                     Directory with plugin files required for CellProfiler. Default: assets/plugins
-      --compensation_tiff           Tiff file for compensation analysis during CellProfiler preprocessing steps
-      --skipIlastik                 Skip Ilastik processing step
-      --outdir                      The output directory where the results will be saved
-      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      --email_on_fail               Same as --email, except only send mail if the workflow is not successful
-      -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+      --ilastik_training_ilp [path]   Parameter file required by Ilastik (*.ilp format)
+      --plugins [path]                Directory with plugin files required for CellProfiler. Default: assets/plugins
+      --compensation_tiff [path]      Tiff file for compensation analysis during CellProfiler preprocessing steps
+      --skip_ilastik [bool]           Skip Ilastik processing step
+      --outdir [path]                 The output directory where the results will be saved
+      --email [str]                   Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      --email_on_fail [bool]          Same as --email, except only send mail if the workflow is not successful
+      -name [str]                     Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
 
     AWSBatch options:
-      --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion                   The AWS Region for your AWS Batch job to run on
+      --awsqueue [str]                The AWSBatch JobQueue that needs to be set when running on AWSBatch
+      --awsregion [str]               The AWS Region for your AWS Batch job to run on
     """.stripIndent()
 }
 
 // Show help message
-if (params.help){
+if (params.help) {
     helpMessage()
     exit 0
 }
@@ -57,7 +64,7 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 }
 
 // Stage config files
-ch_output_docs = file("$baseDir/docs/output.md")
+ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
 
 /*
  * Validate inputs
@@ -77,7 +84,7 @@ if (params.full_stack_cppipe)    { ch_full_stack_cppipe = file(params.full_stack
 if (params.ilastik_stack_cppipe) { ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe, checkIfExists: true) } else { exit 1, "Ilastik stack cppipe file not specified!" }
 if (params.segmentation_cppipe)  { ch_segmentation_cppipe = file(params.segmentation_cppipe, checkIfExists: true) }   else { exit 1, "CellProfiler segmentation cppipe file not specified!" }
 
-if (!params.skipIlastik) {
+if (!params.skip_ilastik) {
     if (params.ilastik_training_ilp) {
         ch_ilastik_training_ilp = file(params.ilastik_training_ilp, checkIfExists: true) } else { exit 1, "Ilastik training ilp file not specified!" }
 }
@@ -120,9 +127,9 @@ summary['Input Files']                  = params.input
 summary['Metadata File']                = params.metadata
 summary['Full Stack cppipe File']       = params.full_stack_cppipe
 summary['Ilastik Stack cppipe File']    = params.ilastik_stack_cppipe
-summary['Skip Ilastik Step']            = params.skipIlastik ? 'Yes' : 'No'
+summary['Skip Ilastik Step']            = params.skip_ilastik ? 'Yes' : 'No'
 if (params.compensation_tiff) summary['Compensation Tiff']    = params.compensation_tiff
-if (!params.skipIlastik) summary['Ilastik Training ilp File'] = params.ilastik_training_ilp
+if (!params.skip_ilastik) summary['Ilastik Training ilp File'] = params.ilastik_training_ilp
 summary['Segmentation cppipe File']     = params.segmentation_cppipe
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if (workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
@@ -283,7 +290,7 @@ process PreprocessIlastikStack {
 /*
  * STEP 4 - ILASTIK
  */
-if (params.skipIlastik) {
+if (params.skip_ilastik) {
     ch_preprocess_full_stack_tiff
         .join(ch_preprocess_ilastik_stack_tiff, by: [0,1])
         .map { it -> [ it[0], it[1], [ it[2], it[3] ].flatten().sort() ] }
@@ -477,13 +484,13 @@ workflow.onComplete {
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/pipeline_info/" )
+    def output_d = new File("${params.outdir}/pipeline_info/")
     if (!output_d.exists()) {
       output_d.mkdirs()
     }
-    def output_hf = new File( output_d, "pipeline_report.html" )
+    def output_hf = new File(output_d, "pipeline_report.html")
     output_hf.withWriter { w -> w << email_html }
-    def output_tf = new File( output_d, "pipeline_report.txt" )
+    def output_tf = new File(output_d, "pipeline_report.txt")
     output_tf.withWriter { w -> w << email_txt }
 
     c_reset = params.monochrome_logs ? '' : "\033[0m";
@@ -506,7 +513,7 @@ workflow.onComplete {
 
 }
 
-def nfcoreHeader(){
+def nfcoreHeader() {
     // Log colors ANSI codes
     c_reset = params.monochrome_logs ? '' : "\033[0m";
     c_dim = params.monochrome_logs ? '' : "\033[2m";
@@ -529,7 +536,7 @@ def nfcoreHeader(){
     """.stripIndent()
 }
 
-def checkHostname(){
+def checkHostname() {
     def c_reset = params.monochrome_logs ? '' : "\033[0m"
     def c_white = params.monochrome_logs ? '' : "\033[0;37m"
     def c_red = params.monochrome_logs ? '' : "\033[1;91m"
