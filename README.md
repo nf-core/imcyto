@@ -39,8 +39,8 @@ nextflow run nf-core/imcyto \
     --input "./mcd/*.mcd" \
     --metadata 'metadata.csv' \
     --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
-    --segmentation_cppipe './plugins/segmentation.cppipe' \
     --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
+    --segmentation_cppipe './plugins/segmentation.cppipe' \
     --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
     -profile <docker/singularity>
 ```
