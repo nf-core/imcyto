@@ -16,32 +16,32 @@ def helpMessage() {
     Usage:
 
     The typical command for running the pipeline is as follows:
-    nextflow run nf-core/imcyto \
-        --input "./mcd/*.mcd" \
-        --metadata 'metadata.csv' \
-        --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
-        --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
-        --segmentation_cppipe './plugins/segmentation.cppipe' \
-        --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
-        -profile docker
+      nextflow run nf-core/imcyto \
+          --input "./mcd/*.mcd" \
+          --metadata 'metadata.csv' \
+          --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
+          --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
+          --segmentation_cppipe './plugins/segmentation.cppipe' \
+          --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+          -profile docker
 
     Mandatory arguments:
-      --input [path]                  Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd
-      --metadata [path]               Path to metadata csv file indicating which images to merge in full stack and/or Ilastik stack
-      --full_stack_cppipe [path]      CellProfiler pipeline file required to create full stack (cppipe format)
-      --ilastik_stack_cppipe [path]   CellProfiler pipeline file required to create Ilastik stack (cppipe format)
-      --segmentation_cppipe [path]    CellProfiler pipeline file required for segmentation (cppipe format)
+      --input [file]                  Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd
+      --metadata [file]               Path to metadata csv file indicating which images to merge in full stack and/or Ilastik stack
+      --full_stack_cppipe [file]      CellProfiler pipeline file required to create full stack (cppipe format)
+      --ilastik_stack_cppipe [file]   CellProfiler pipeline file required to create Ilastik stack (cppipe format)
+      --segmentation_cppipe [file]    CellProfiler pipeline file required for segmentation (cppipe format)
       -profile [str]                  Configuration profile to use. Can use multiple (comma separated)
                                       Available: docker, singularity, awsbatch, test and more.
 
     Other options:
-      --ilastik_training_ilp [path]   Parameter file required by Ilastik (ilp format)
-      --compensation_tiff [path]      Tiff file for compensation analysis during CellProfiler preprocessing steps
+      --ilastik_training_ilp [file]   Parameter file required by Ilastik (ilp format)
+      --compensation_tiff [file]      Tiff file for compensation analysis during CellProfiler preprocessing steps
       --skip_ilastik [bool]           Skip Ilastik processing step
-      --plugins [path]                Path to directory with plugin files required for CellProfiler. Default: assets/plugins
-      --outdir [path]                 The output directory where the results will be saved
-      --email [str]                   Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      --email_on_fail [bool]          Same as --email, except only send mail if the workflow is not successful
+      --plugins [file]                Path to directory with plugin files required for CellProfiler. Default: assets/plugins
+      --outdir [file]                 The output directory where the results will be saved
+      --email [email]                 Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      --email_on_fail [email]         Same as --email, except only send mail if the workflow is not successful
       -name [str]                     Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
 
     AWSBatch options:
@@ -163,10 +163,10 @@ process IMCTools {
     tag "$name"
     label 'process_medium'
     publishDir "${params.outdir}/imctools/${name}", mode: 'copy',
-        saveAs: {filename ->
-            if (filename.indexOf("version.txt") > 0) null
-            else filename
-        }
+        saveAs: { filename ->
+                      if (filename.indexOf("version.txt") > 0) null
+                      else filename
+                }
 
     input:
     set val(name), file(mcd) from ch_mcd
@@ -225,10 +225,10 @@ process PreprocessFullStack {
     tag "${name}.${roi}"
     label 'process_medium'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy',
-        saveAs: {filename ->
-            if (filename.indexOf("version.txt") > 0) null
-            else filename
-        }
+        saveAs: { filename ->
+                      if (filename.indexOf("version.txt") > 0) null
+                      else filename
+                }
 
     input:
     set val(name), val(roi), file(tiff) from ch_full_stack_tiff
@@ -301,10 +301,10 @@ if (params.skip_ilastik) {
         tag "${name}.${roi}"
         label 'process_medium'
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy',
-            saveAs: {filename ->
-                if (filename.indexOf("version.txt") > 0) null
-                else filename
-            }
+            saveAs: { filename ->
+                          if (filename.indexOf("version.txt") > 0) null
+                          else filename
+                    }
 
         input:
         set val(name), val(roi), file(tiff) from ch_preprocess_ilastik_stack_tiff
@@ -391,10 +391,10 @@ process output_documentation {
  */
 process get_software_versions {
     publishDir "${params.outdir}/pipeline_info", mode: 'copy',
-        saveAs: {filename ->
-            if (filename.indexOf(".csv") > 0) filename
-            else null
-        }
+        saveAs: { filename ->
+                      if (filename.indexOf(".csv") > 0) filename
+                      else null
+                }
 
     input:
     file imctools from ch_imctools_version.first()
