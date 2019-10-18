@@ -1,4 +1,4 @@
-# nf-core/atacseq: Citations
+# nf-core/imcyto: Citations
 
 ## Pipeline tools
 
@@ -10,9 +10,9 @@
 * [ilastik](https://www.ncbi.nlm.nih.gov/pubmed/31570887/)
   > Berg S, Kutra D, Kroeger T, Straehle CN, Kausler BX, Haubold C, Schiegg M, Ales J, Beier T, Rudy M, Eren K, Cervantes JI, Xu B, Beuttenmueller F, Wolny A, Zhang C, Koethe U, Hamprecht FA, Kreshuk A. ilastik: interactive machine learning for (bio)image analysis. Nat Methods. 2019 Sep 30. doi: 10.1038/s41592-019-0582-9. [Epub ahead of print] Review. PubMed PMID: 31570887.
 
-## Software packaging/container tools
+## Software packaging/containerisation tools
 
-> [BioContainers](https://www.ncbi.nlm.nih.gov/pubmed/28379341/)
+* [BioContainers](https://www.ncbi.nlm.nih.gov/pubmed/28379341/)
   > da Veiga Leprevost F, Grüning BA, Alves Aflitos S, Röst HL, Uszkoreit J, Barsnes H, Vaudel M, Moreno P, Gatto L, Weber J, Bai M, Jimenez RC, Sachsenberg T, Pfeuffer J, Vera Alvarez R, Griss J, Nesvizhskii AI, Perez-Riverol Y. BioContainers: an open-source and community-driven framework for software standardization. Bioinformatics. 2017 Aug 15;33(16):2580-2582. doi: 10.1093/bioinformatics/btx192. PubMed PMID: 28379341; PubMed Central PMCID: PMC5870671.
 
 * [Singularity](https://www.ncbi.nlm.nih.gov/pubmed/28494014/)
