@@ -28,8 +28,10 @@ ii. Install one of [`docker`](https://docs.docker.com/engine/installation/) or [
 iii. Download the pipeline and test it on a minimal dataset with a single command
 
 ```bash
-nextflow run nf-core/imcyto -profile test,<docker/singularity>
+nextflow run nf-core/imcyto -profile test,<docker/singularity/institute>
 ```
+
+> Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile institute` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
 
 iv. Start running your own analysis!
 
@@ -42,7 +44,7 @@ nextflow run nf-core/imcyto \
     --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
     --segmentation_cppipe './plugins/segmentation.cppipe' \
     --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
-    -profile <docker/singularity>
+    -profile <docker/singularity/institute>
 ```
 
 See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
@@ -83,4 +85,4 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 You can cite the `nf-core` pre-print as follows:  
 > Ewels PA, Peltzer A, Fillinger S, Alneberg JA, Patel H, Wilm A, Garcia MU, Di Tommaso P, Nahnsen S. **nf-core: Community curated bioinformatics pipelines**. *bioRxiv*. 2019. p. 610741. [doi: 10.1101/610741](https://www.biorxiv.org/content/10.1101/610741v1).
 
-An extensive list of references for the tools used by the pipeline can be found in the [citation](CITATIONS.md) file.
+An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
