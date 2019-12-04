@@ -2,19 +2,17 @@
 
 ## Pipeline overview
 
-The pipeline is built using [Nextflow](https://www.nextflow.io/). See [`main README.md`](../README.md#pipeline-summary) for a condensed overview of the steps in the pipeline, and the bioinformatics tools used at each step.
+The pipeline is built using [Nextflow](https://www.nextflow.io/). See main [`README.md`](../README.md#pipeline-summary) for a condensed overview of the steps in the pipeline, and the bioinformatics tools used at each step.
 
-This is an automated pipeline for the pre-processing and single cell segmentation of imaging data generated using Imaging Mass Cytometry data, however, it is flexible enough to be applicable to other types of imaging data (e.g. confocal).
+This is an automated pipeline for the pre-processing and single cell segmentation of imaging data generated from Imaging Mass Cytometry experiments, however, it is flexible enough to be applicable to other types of imaging data (e.g. confocal).
 
 The input to the pipeline can be in either `mcd`, `ome.tiff` or `txt` file format from which stacks of `tiff` files are generated for subsequent analysis. The various stages of this pipeline allow the `tiff` images to be pre-processed, and segmented using multiple CellProfiler `cppipe` project files and the pixel-classification software Ilastik. The concept of this step-wise image segmentation by combining Ilastik with CellProfiler was based on the analysis pipeline as described by the Bodenmiller group [(Zanotelli & Bodenmiller, Jan 2019)](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf).
+
+![workflow schematic](images/schematic.png)
 
 The [plugins](../assets/plugins/) supplied with the pipeline constitute the minimal requirements to generate a single cell mask. A more refined and comprehensive pipeline will be uploaded in due course.
 
 This pipeline is designed to run on most compute infrastructures without the need to pre-install any of the software packages. However, in order to initially create the custom plugin files required by the pipeline, one needs to install the latest GUI versions of [CellProfiler](https://cellprofiler.org/releases/) and [Ilastik](https://www.ilastik.org/download.html) on a local machine (see [Pipeline Adaptations](#pipeline-adaptations)).  
-
-## Pipeline Workflow Schematic:
-
-![Workflow schematic](images/schematic.png)
 
 ## Pipeline Prerequisites:
 
