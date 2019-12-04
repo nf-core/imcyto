@@ -154,7 +154,7 @@ Check the images chosen in `metadata.csv` match the names chosen in the CellProf
 
 Reopen the corresponding CellProfiler `cppipe` file and check that the "SaveImages" module is set to give the correct output, re-export this and re-run the pipeline by using the `-resume` parameter.
 
-* For ROIs larger than ~2000-2000um the pipeline may struggle/fail to compete due to reaching memory capacity during ‘IdentifyObjects’ modules in ‘segmentation.cppipe’. As a workaround for this we recommend adding in a ‘Crop’ module before identifying objects to crop your images into two. Make sure to duplicate any subsequent modules and adjust input names as required.
+* For ROIs larger than ~2000-2000um the pipeline may struggle/fail to complete due to the excessive memory requirements during the "IdentifyObjects" module in `segmentation.cppipe`. As a workaround for this we recommend adding in a "Crop" module before identifying objects to crop your images into two. Make sure to duplicate any subsequent modules and adjust input names as required.
 
 ## Related software
 
