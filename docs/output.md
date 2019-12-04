@@ -16,9 +16,9 @@ This pipeline is designed to run on most compute infrastructures without the nee
 
 ![workflow schematic](images/schematic.png)
 
-## Pipeline Prerequisites:
+## Pipeline prerequisites
 
-- **.mcd**, **.ome.tiff** or **.txt** data file, generated without any spaces in the file name. Associated antibody panel should contain metal and antibody information in the form of ‘metal_antibody’ (eg. 89Y_CD45).
+- `mcd`, `ome.tiff` or `txt` data file(s) without any spaces in the file name. Associated antibody panel should contain metal and antibody information in the form of "metal_antibody" e.g. `89Y_CD45`.
 
 - **metadata.csv** file containing your antibody panel to identify which corresponding .tiff files are to be put into full_stack and ilastik_stack folders (example shown in **Pipeline Workflow Schematic**). File should contain only three columns titled ‘metal’, ‘full_stack’ and ‘ilastik_stack’. ‘metal’ column should contain all the metals used in your antibody panel. ‘full_stack’ and ‘ilastik_stack’ columns should be used to identify which metals to include in boolean labelling (1 = use or 0 = don’t use).
 
