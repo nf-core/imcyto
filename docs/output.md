@@ -16,7 +16,8 @@ This pipeline is designed to run on most compute infrastructures without the nee
 
 ![workflow schematic](images/schematic.png)
 
-- **NOTE: REMOVE SPACE AFTER IMAGE AND ADD PIPELINE DAG TOO?**
+* **NOTE: REMOVE SPACE AFTER IMAGE AND ADD PIPELINE DAG TOO?**
+* **NOTE: MAKE IMAGES SMALLER**
 
 ## File prerequisites
 
@@ -60,7 +61,7 @@ nextflow run nf-core/imcyto \
     -profile <docker/singularity/institute>
 ```
 
-Nextflow will download the pipeline and associated software containers in order to execute the pipeline. See [Adding your own cluster configuration](https://nf-co.re/usage/adding_own_config) for tips on how to customise the pipeline execution for your compute infrastructure.
+Nextflow will automatically download the pipeline and its associated software containers in order to execute the pipeline. See [Adding your own cluster configuration](https://nf-co.re/usage/adding_own_config) for tips on how to customise the pipeline execution for your compute infrastructure.
 
 ## Inputs/outputs
 
