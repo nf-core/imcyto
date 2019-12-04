@@ -20,7 +20,7 @@ This pipeline is designed to run on most compute infrastructures without the nee
 
 - `mcd`, `ome.tiff` or `txt` data file(s) without any spaces in the file name. Associated antibody panel should contain metal and antibody information in the form of "metal_antibody" e.g. "89Y_CD45".
 
-- `metadata.csv` file containing your antibody panel to identify which corresponding `tiff` files are to be used for the full and Ilastik stacks (see [`--metadata.csv`](../usage.md#--metadata))
+- `metadata.csv` file containing your antibody panel to identify which corresponding `tiff` files are to be used for the full and Ilastik stacks (see [`--metadata.csv`](usage.md#--metadata))
 
 - **‘NamesAndTypes’** module in all CellProfiler .cppipe files (see **Pipeline Adaptations**) will need to be edited to match your antibody panel and desired markers to identify cell nuclei and membranes. Other recommended changes to the pipeline are outlined below - **Pipeline Details**.
 
