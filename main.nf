@@ -17,12 +17,13 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
       nextflow run nf-core/imcyto \
-          --input "./data/*.mcd" \
-          --metadata 'metadata.csv' \
+          --input "./inputs/*.mcd" \
+          --metadata './inputs/metadata.csv' \
           --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
           --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
           --segmentation_cppipe './plugins/segmentation.cppipe' \
           --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+          --plugins './plugins/cp_plugins/' \
           -profile docker
 
     Mandatory arguments:
@@ -175,8 +176,8 @@ process IMCTools {
     output:
     set val(name), file("*/full_stack/*") into ch_full_stack_tiff
     set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
-    file "*/*ome.tiff" into ch_stacks_ometiff
-    file "*.csv" into ch_mcd_sampleinfo
+    file "*/*ome.tiff"
+    file "*.csv"
     file "*version.txt" into ch_imctools_version
 
     script: // This script is bundled with the pipeline, in nf-core/imcyto/bin/
@@ -352,8 +353,8 @@ process Segmentation {
     file plugin_dir from ch_segmentation_plugin.collect()
 
     output:
-    set val(name), val(roi), file("*.csv") into ch_segmentation_csv
-    set val(name), val(roi), file("*.tiff") into ch_segmentation_tiff
+    set val(name), val(roi), file("*.csv")
+    set val(name), val(roi), file("*.tiff")
 
     script:
     """

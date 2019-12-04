@@ -1,9 +1,7 @@
 # ![nfcore/imcyto](docs/images/nf-core-imcyto_logo.png)
 
 [![Build Status](https://travis-ci.com/nf-core/imcyto.svg?branch=master)](https://travis-ci.com/nf-core/imcyto)
-[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.04.0-brightgreen.svg)](https://www.nextflow.io/)
-
-[![Docker](https://img.shields.io/docker/automated/nfcore/imcyto.svg)](https://hub.docker.com/r/nfcore/imcyto)
+[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
 
 ## Introduction
 
@@ -13,11 +11,15 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 ## Pipeline summary
 
-1. Split mcd file by ROI, and save full and ilastik stacks separately based on specification in `metadata.csv` ([`imctools`](https://github.com/BodenmillerGroup/imctools))
-2. Apply preprocessing filters to full stack tiff files ([`CellProfiler`](https://cellprofiler.org/); `--full_stack_cppipe` parameter)
-3. Merge images from ilastik stack to obtain RGB image of cell nuclei and membranes to generate a composite tiff ([`CellProfiler`](https://cellprofiler.org/); `--ilastik_stack_cppipe` parameter)
-4. Use composite tiff to classify pixels as membrane, nuclei or background, and save probabilities map as tiff ([`Ilastik`](https://www.ilastik.org/); `--ilastik_training_ilp` parameter; *optional*)
-5. Use probability tiffs and preprocessed full stack tiffs for single cell segmentation to generate a cell mask as tiff and then overlay cell mask onto full stack tiff images to extract single cell information generating a csv file ([`CellProfiler`](https://cellprofiler.org/); `--segmentation_cppipe` parameter)
+1. Split image acquisition output files (`mcd`, `ome.tiff` or `txt`) by ROI and convert to individual `tiff` files for channels with names matching those defined in user-provided `metadata.csv` file. Full and ilastik stacks will be generated separately for all channels being analysed in single cell expression analysis, and for channels being used to generate the cell mask, respectively ([imctools](https://github.com/BodenmillerGroup/imctools)).
+
+2. Apply pre-processing filters to full stack `tiff` files ([CellProfiler](https://cellprofiler.org/)).
+
+3. Use selected `tiff` files in ilastik stack to generate a composite RGB image representative of the plasma membranes and nuclei of all cells ([CellProfiler](https://cellprofiler.org/)).
+
+4. Use composite cell map to apply pixel classification for membranes, nuclei or background, and save probabilities map as `tiff` ([Ilastik](https://www.ilastik.org/)). If CellProfiler modules alone are deemed sufficient to achieve a reliable segmentation mask this step can be bypassed using the `--skip_ilastik` parameter in which case the composite `tiff` generated in step 3 will be used in subsequent steps instead.
+
+5. Use probability/composite `tiff` and pre-processed full stack `tiff` for segmentation to generate a single cell mask as `tiff`, and subsequently overlay cell mask onto full stack `tiff` to generate single cell expression data in `csv` file ([CellProfiler](https://cellprofiler.org/)).
 
 ## Quick Start
 
@@ -38,12 +40,13 @@ iv. Start running your own analysis!
 <!-- TODO nf-core: Update the default command above used to run the pipeline -->
 ```bash
 nextflow run nf-core/imcyto \
-    --input "./mcd/*.mcd" \
-    --metadata 'metadata.csv' \
+    --input "./inputs/*.mcd" \
+    --metadata './inputs/metadata.csv' \
     --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
     --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
     --segmentation_cppipe './plugins/segmentation.cppipe' \
     --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+    --plugins './plugins/cp_plugins/' \
     -profile <docker/singularity/institute>
 ```
 
