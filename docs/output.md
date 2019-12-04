@@ -76,8 +76,11 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 *Output files*:
 
-* `imctools/<SAMPLE>/full_stack/*.tiff`  
-* `imctools/<SAMPLE>/ilastik_stack/*.tiff`  
+* `imctools/<SAMPLE>/*.csv`  
+* `imctools/<SAMPLE>/<ROI>/full_stack/*.tiff`  
+* `imctools/<SAMPLE>/<ROI>/full_stack.ome.tiff`  
+* `imctools/<SAMPLE>/<ROI>/ilastik_stack/*.tiff`  
+* `imctools/<SAMPLE>/<ROI>/ilastik_stack.ome.tiff`  
 
 *Description*:  
 
