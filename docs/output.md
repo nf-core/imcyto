@@ -46,9 +46,8 @@ Once you have created/obtained the files required to run the pipeline, the direc
 
 ![Example folder structure](images/folder_structure.png)
 
-Providing you have installed the version of Nextflow required by the pipeline, and you either have `Docker` or `Singularity` installed you can then execute the pipeline on your compute infrastructure using the command below:
+Providing you have installed the version of Nextflow required by the pipeline, and you either have Docker or Singularity installed and available on the `PATH`, you can then execute the pipeline on your compute infrastructure using the command below:
 
-A representative execution command
 ```bash
 nextflow run nf-core/imcyto \
     --input "./mcd/*.mcd" \
@@ -60,6 +59,8 @@ nextflow run nf-core/imcyto \
     --plugins './plugins/cp_plugins/'
     -profile <docker/singularity/institute>
 ```
+
+Nextflow will download the pipeline and associated software containers in order to execute the pipeline.
 
 ## Inputs/outputs
 
