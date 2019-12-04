@@ -17,7 +17,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
       nextflow run nf-core/imcyto \
-          --input "./mcd/*.mcd" \
+          --input "./data/*.mcd" \
           --metadata 'metadata.csv' \
           --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
           --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
@@ -26,7 +26,7 @@ def helpMessage() {
           -profile docker
 
     Mandatory arguments:
-      --input [file]                  Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd
+      --input [file]                  Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd, *.ome.tiff, *.txt
       --metadata [file]               Path to metadata csv file indicating which images to merge in full stack and/or Ilastik stack
       --full_stack_cppipe [file]      CellProfiler pipeline file required to create full stack (cppipe format)
       --ilastik_stack_cppipe [file]   CellProfiler pipeline file required to create Ilastik stack (cppipe format)
@@ -175,6 +175,7 @@ process IMCTools {
     output:
     set val(name), file("*/full_stack/*") into ch_full_stack_tiff
     set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
+    file "*/*ome.tiff" into ch_stacks_ometiff
     file "*.csv" into ch_mcd_sampleinfo
     file "*version.txt" into ch_imctools_version
 
