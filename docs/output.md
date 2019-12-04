@@ -144,7 +144,7 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 ![Segmentation](images/segmentation.png)
 
-## Example output
+## Example pipeline output
 
 Cell mask overlay image created in [HistoCAT](http://www.bodenmillerlab.com/research-2/histocat/) with nuclei and membrane channels coloured in red and green, respectively.
 
@@ -198,15 +198,3 @@ For ROIs larger than ~2000-2000um the pipeline may struggle/fail to complete due
 * [QuPath](https://qupath.github.io/) can be used for visualisation with the added benefit of viewing all channels at once in a mini viewer panel.
 
 * [HistoCAT](http://www.bodenmillerlab.com/research-2/histocat/) developed by the Bodenmiller lab enables visualisation of images and contains various analysis tools including PhenoGraph, tSNE, PCA and Neighbourhood analysis.
-
-## Collated weblinks
-
-- [Zanotelli & Bodenmiller, Jan 2019](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf)
-- [CellProfiler](https://cellprofiler.org/)
-- [CellProfiler Bodenmiller custom plugins](https://github.com/BodenmillerGroup/ImcPluginsCP)
-- [Ilastik](https://www.ilastik.org/)
-- [MCD Viewer](https://www.fluidigm.com/software)
-- [Fiji-ImageJ](https://imagej.net/Fiji)
-- [imctools](https://github.com/BodenmillerGroup/imctools)
-- [QuPath](https://qupath.github.io/)
-- [HistoCAT](http://www.bodenmillerlab.com/research-2/histocat/)
