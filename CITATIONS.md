@@ -11,7 +11,14 @@
 * [ilastik](https://www.ncbi.nlm.nih.gov/pubmed/31570887/)
   > Berg S, Kutra D, Kroeger T, Straehle CN, Kausler BX, Haubold C, Schiegg M, Ales J, Beier T, Rudy M, Eren K, Cervantes JI, Xu B, Beuttenmueller F, Wolny A, Zhang C, Koethe U, Hamprecht FA, Kreshuk A. ilastik: interactive machine learning for (bio)image analysis. Nat Methods. 2019 Sep 30. doi: 10.1038/s41592-019-0582-9. [Epub ahead of print] Review. PubMed PMID: 31570887.
 
+* [histoCAT](https://www.ncbi.nlm.nih.gov/pubmed/28783155/)
+  > Schapiro D, Jackson HW, Raghuraman S, Fischer JR, Zanotelli VRT, Schulz D, Giesen C, Catena R, Varga Z, Bodenmiller B. histoCAT: analysis of cell phenotypes and interactions in multiplex image cytometry data. Nat Methods. 2017 Sep;14(9):873-876. doi: 10.1038/nmeth.4391. Epub 2017 Aug 7. PubMed PMID: 28783155; PubMed Central PMCID: PMC5617107.
+
 * [imctools](https://github.com/BodenmillerGroup/imctools)
+
+* [Zanotelli & Bodenmiller, Jan 2019](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf)
+
+* [CellProfiler Bodenmiller custom plugins](https://github.com/BodenmillerGroup/ImcPluginsCP)
 
 ## Software packaging/containerisation tools
 
