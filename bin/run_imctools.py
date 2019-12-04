@@ -58,7 +58,7 @@ for line in fin.readlines():
     ## CREATE DICTIONARY
     metal = metal.upper()
     if metal not in metalDict:
-    metalDict[metal] = [bool(int(x)) for x in [fstack,istack]]
+        metalDict[metal] = [bool(int(x)) for x in [fstack,istack]]
 fin.close()
 
 ## OUTPUT FILE LINKING ROI IDS TO ROI LABELS (IMAGE DESCRIPTION)
@@ -74,9 +74,9 @@ if file_type == "mcd":
 else:
     if file_type == "txt":
         parser = txtparser.TxtParser(args.INPUT_FILE)
-	elif file_type == "tiff" or file_type == "tif":
+    elif file_type == "tiff" or file_type == "tif":
         parser = omeparser.OmetiffParser(args.INPUT_FILE)
-	else:
+    else:
         print("{}: Invalid input file type - should be txt, tiff, or mcd!".format(file_type))
         sys.exit(1)
 
