@@ -141,22 +141,28 @@ The `results/pipeline_info/` directory will contain the following reports:
 
 When there are errors with the execution of the pipeline, the pipeline log will tell you exactly which process has caused the error, the command output and the command error, as well as the path to a unique directory (e.g. `work/00/c7ac5c89d10e234abaf25b2213634b`) where the process would have been executed.
 
-### If the pipeline fails to run, in the first instance try to re-run it with the addition of the `-resume` parameter
+> If the pipeline fails to run, in the first instance try to re-run it with the addition of the `-resume` parameter
 
-### The most common source of error occurs in the naming of the channels:  
+### Channels naming  
 
-  `Command output: CP-JAVA 15:04:54.326 [Thread-0] WARN  o.c.imageset.ChannelFilter - Channels have different numbers of images`  
-  `Command error: ... Error for image set, channel=1, metadata=CD4: Image missing from channel`  
+```bash
+Command output: CP-JAVA 15:04:54.326 [Thread-0] WARN  o.c.imageset.ChannelFilter - Channels have different numbers of images
+Command error: ... Error for image set, channel=1, metadata=CD4: Image missing from channel
+```
 
-  Check the images chosen in `metadata.csv` match the names chosen in the CellProfiler "NamesandTypes" modules. Make sure all metal names are correct and unambiguous (e.g. CD4 will find both CD4 and CD44 in "NamesandTypes").
+Check the images chosen in `metadata.csv` match the names chosen in the CellProfiler "NamesandTypes" modules. Make sure all metal names are correct and unambiguous (e.g. CD4 will find both CD4 and CD44 in "NamesandTypes").
 
-### Another common error is missing output files:  
+### Missing output files:  
 
-  `Caused by: Missing output file(s) 'ilastik_stack/*' expected by process 'PreprocessIlastikStack (file_name_roi_1)'`  
+```bash
+Caused by: Missing output file(s) 'ilastik_stack/*' expected by process 'PreprocessIlastikStack (file_name_roi_1)'
+```
 
-  Reopen the corresponding CellProfiler `cppipe` file and check that the "SaveImages" module is set to give the correct output, re-export this and re-run the pipeline by using the `-resume` parameter.
+Reopen the corresponding CellProfiler `cppipe` file and check that the "SaveImages" module is set to give the correct output, re-export this and re-run the pipeline by using the `-resume` parameter.
 
-### For ROIs larger than ~2000-2000um the pipeline may struggle/fail to complete due to the excessive memory requirements during the "IdentifyObjects" module in `segmentation.cppipe`. As a workaround for this we recommend adding in a "Crop" module before identifying objects to crop your images into two. Make sure to duplicate any subsequent modules and adjust input names as required.
+### ROI size
+
+For ROIs larger than ~2000-2000um the pipeline may struggle/fail to complete due to the excessive memory requirements during the "IdentifyObjects" module in `segmentation.cppipe`. As a workaround for this we recommend adding in a "Crop" module before identifying objects to crop your images into two. Make sure to duplicate any subsequent modules and adjust input names as required.
 
 ## Related software
 
