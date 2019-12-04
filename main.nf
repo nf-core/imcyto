@@ -175,8 +175,8 @@ process IMCTools {
     output:
     set val(name), file("*/full_stack/*") into ch_full_stack_tiff
     set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
-    file "*/*ome.tiff" into ch_stacks_ometiff
-    file "*.csv" into ch_mcd_sampleinfo
+    file "*/*ome.tiff"
+    file "*.csv"
     file "*version.txt" into ch_imctools_version
 
     script: // This script is bundled with the pipeline, in nf-core/imcyto/bin/
@@ -352,8 +352,8 @@ process Segmentation {
     file plugin_dir from ch_segmentation_plugin.collect()
 
     output:
-    set val(name), val(roi), file("*.csv") into ch_segmentation_csv
-    set val(name), val(roi), file("*.tiff") into ch_segmentation_tiff
+    set val(name), val(roi), file("*.csv")
+    set val(name), val(roi), file("*.tiff")
 
     script:
     """
