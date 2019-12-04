@@ -1,36 +1,16 @@
 # nf-core/imcyto: Output
 
-# IMCYTO-dev
+## Pipeline overview
 
-# Pipeline Documentation
+The pipeline is built using [Nextflow](https://www.nextflow.io/). See [`main README.md`](../README.md#pipeline-summary) for a condensed overview of the steps in the pipeline, and the bioinformatics tools used at each step.
 
-**---------- Pipeline Execution section on how the pipeline runs needs to be explained! ----------**
+This is an automated pipeline for the pre-processing and single cell segmentation of imaging data generated using Imaging Mass Cytometry data, however, it is flexible enough to be applicable to other types of imaging data (e.g. confocal).
 
-## Introduction:
+The input to the pipeline can be in either `mcd`, `ome.tiff` or `txt` file format from which stacks of `tiff` files are generated for subsequent analysis. The various stages of this pipeline allow the `tiff` images to be pre-processed, and segmented using multiple CellProfiler `cppipe` project files and the pixel-classification software Ilastik. The concept of this step-wise image segmentation by combining Ilastik with CellProfiler was based on the analysis pipeline as described by the Bodenmiller group [(Zanotelli & Bodenmiller, Jan 2019)](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf).
 
-This is an automated pipeline for pre-processing and single cell segmentation of imaging data, generated using Imaging Mass Cytometry data but is flexible enough to be applicable to various types of imaging data (eg. confocal).
+The [plugins](../assets/plugins/) supplied with the pipeline constitute the minimal requirements to generate a single cell mask. A more refined and comprehensive pipeline will be uploaded in due course.
 
-This pipeline allows input data in the format of mcd, ome.tiff or txt files from which stacks of tiff files are generated for subsequent analysis. The various stages of this pipeline allow the tiff images to be pre-processed, and segmented using multiple CellProfiler .cppipe project files and the pixel-classification software Ilastik. The concept of this stepwise image segmentation combining Ilastik with CellProfiler was based on the analysis pipeline as described by the Bodenmiller group [(Zanotelli & Bodenmiller, Jan 2019)](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf).
-
-The plugins supplied with the pipeline constitute the minimal requirements to generate a single cell mask. A more refined and comprehensive pipeline will be uploaded in due course.
-
-This pipeline was automated by Harshil Patel and Nourdine Bah at the Francis Crick Institute, using dockers/singularity/nextflow to package together various image analysis tools, allowing batch processing, parallelised, and fast analysis (see **Pipeline Execution** for more details.
-This pipeline is designed to run on a server/cluster without the need to pre-install any of the software packages. However, to modify/customise the pipeline, one needs to install the [CellProfiler(v3.1.8)](https://cellprofiler.org/ 'CellProfiler') and [Ilastik(v1.3.3)](https://www.ilastik.org/ 'Ilastik') softwares on a local machine (see **Pipeline Adaptations** section).  
-
-## Pipeline Summary:
-
-1. **(IMCTools)** Generate .tiff files from image acquisition output: Open .mcd, .ome.tiff or .txt files and contained ROIs and save individual .tiff files for channels with names matching those defined in a metadata.csv file into corresponding folders – full_stack for all channels being analysed in single cell expression analysis; ilastik_stack for channels being used to generate the cell mask.
-
-2. **(CellProfiler – full_stack_preprocessing.cppipe)** Preprocess full_stack images: Apply preprocessing filters to all .tiff files in the full_stack folder and save.
-
-3. **(CellProfiler – ilastik_stack_preprocessing.cppipe)** Generate a composite image representive of all cells plasma membranes: Merge select .tiff images from the ilastik_stack subfolder to create a composite RGB image of cell nuclei and plasma membranes and save as a composite.tiff.
-
-4. **(Ilastik)** Apply pixel classification to the composite cell map: Use composite.tiff to classify pixels as membrane, nuclei or background, and save probability maps as .tiffs.
-*Alternative option to skip ilastik pixel classification and use composite.tiff instead of probabilty .tiff in subequent steps. This approach might be preferred if CellProfiler modules alone are deemed sufficient to achieve a reliable segmentation mask.*
-
-5. **(CellProfiler – segmentation.cppipe)** Generate a single cell mask: Use probability .tiffs and pre-processed full_stack .tiffs for single cell segmentation to generate a cell mask.
-
-6. **(CellProfiler – segmentation.cppipe)** Output single cell expression data: Overlay cell mask onto full_stack .tiff images to extract single cell information generating a csv file.
+This pipeline is designed to run on most compute infrastructures without the need to pre-install any of the software packages. However, in order to initially create the custom plugin files required by the pipeline, one needs to install the latest GUI versions of [CellProfiler](https://cellprofiler.org/releases/) and [Ilastik](https://www.ilastik.org/download.html) on a local machine (see [Pipeline Adaptations](#pipeline-adaptations)).  
 
 ## Pipeline Workflow Schematic:
 
