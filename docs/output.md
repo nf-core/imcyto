@@ -95,7 +95,7 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 *Output files*:
 
-* `preprocess/<SAMPLE>/<ROI>/*.tiff`  
+* `preprocess/<SAMPLE>/<ROI>/full_stack/*.tiff`  
 
 *Description*:  
 
@@ -112,7 +112,7 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 *Output files*:
 
-* `preprocess/<SAMPLE>/<ROI>/composite.tiff`  
+* `preprocess/<SAMPLE>/<ROI>/ilastik_stack/composite.tiff`  
 
 *Description*:  
 
@@ -129,8 +129,9 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 *Output files*:
 
-* `preprocess/<SAMPLE>/<ROI>/composite.tiff`
-* three .tiff images titled ‘composite_Probabilities_’ ending in either 0 (for membrane), 1 (for nuclei) or 2 (for background).
+* `ilastik/<SAMPLE>/<ROI>/composite_Probabilities_0.tiff` (membrane)
+* `ilastik/<SAMPLE>/<ROI>/composite_Probabilities_1.tiff` (nuclei)
+* `ilastik/<SAMPLE>/<ROI>/composite_Probabilities_2.tiff` (background)
 
 *Description*:  
 
@@ -147,8 +148,8 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 *Output files*:
 
-* `preprocess/<SAMPLE>/<ROI>/composite.tiff`
-* .tiff image titled ‘Cells_mask’ and ‘Cells.csv’ file containing single cell data.
+* `segmentation/<SAMPLE>/<ROI>/Cells.csv`
+* `segmentation/<SAMPLE>/<ROI>/Cells_mask.tiff`
 
 *Description*:  
 
