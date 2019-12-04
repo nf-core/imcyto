@@ -56,7 +56,7 @@ Once you have created/obtained the files required to run the pipeline, the direc
     ├── ilastik_training_params.ilp
     └── segmentation.cppipe
 ```
-**When running Mihaelas updated version the input file was called 'data' and the metadata.csv was outside in the main folder not in the data folder.
+**NOTE: When running Mihaelas updated version the input file was called 'data' and the metadata.csv was outside in the main folder not in the data folder.
 Also what happens when you run a mix of file types in the same folder? In this case remember to include ROI number in the txt/tiff file name (as mcd creates multiple ROI folders and it could get confusing if you are running similarly titled mcd's and txt/tiff in same/seperate runs).**
 
 Providing you have installed the version of Nextflow required by the pipeline, and you either have Docker or Singularity installed and available on the `PATH`, you can then execute the pipeline on your compute infrastructure using the command below:
