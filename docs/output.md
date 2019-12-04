@@ -43,11 +43,7 @@ This pipeline is designed to run on most compute infrastructures without the nee
 
 ## Pipeline execution
 
-Once you have created/obtained the files required to run the pipeline, the directory structure may look like the image below:
-
-![Example folder structure](images/folder_structure.png)
-
-Providing you have installed the version of Nextflow required by the pipeline, and you either have Docker or Singularity installed and available on the `PATH`, you can then execute the pipeline on your compute infrastructure using the command below:
+Once you have created/obtained the files required to run the pipeline, the directory structure may look like the listing below:
 
 ```bash
 .
@@ -64,16 +60,17 @@ Providing you have installed the version of Nextflow required by the pipeline, a
     └── segmentation.cppipe
 ```
 
+Providing you have installed the version of Nextflow required by the pipeline, and you either have Docker or Singularity installed and available on the `PATH`, you can then execute the pipeline on your compute infrastructure using the command below:
 
 ```bash
 nextflow run nf-core/imcyto \
-    --input "./mcd/*.mcd" \
-    --metadata './mcd/metadata.csv' \
+    --input "./inputs/*.mcd" \
+    --metadata './inputs/metadata.csv' \
     --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
     --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
-    --segmentation_cppipe './plugins/segmentation.cppipe' \
     --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
-    --plugins './plugins/cp_plugins/'
+    --segmentation_cppipe './plugins/segmentation.cppipe' \
+    --plugins './plugins/cp_plugins/' \
     -profile <docker/singularity/institute>
 ```
 

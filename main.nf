@@ -17,12 +17,13 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
       nextflow run nf-core/imcyto \
-          --input "./data/*.mcd" \
-          --metadata 'metadata.csv' \
+          --input "./inputs/*.mcd" \
+          --metadata './inputs/metadata.csv' \
           --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
           --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
           --segmentation_cppipe './plugins/segmentation.cppipe' \
           --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+          --plugins './plugins/cp_plugins/' \
           -profile docker
 
     Mandatory arguments:
