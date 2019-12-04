@@ -140,13 +140,9 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 * Within ‘MeasureObjectIntensity Multichannel’ you will need to select all the images that you would like the intensity to be measured for.
 * Further parameters can be customised, such as the desired measurements to export in ‘ExportToSpreadsheet’. Currently this pipeline exports data only for each cell object: area, mean intensity, object center location and object number.
 * Make sure to export a .cppipe file titled ‘segmentation’.
+* Image below represents an example of the steps in segmentation.cppipe, with nuclei image input from full_stack_preprocessing and membrane probability input from ilastik, to generate the resulting cell mask. Mask overlay image created in [HistoCAT](http://www.bodenmillerlab.com/research-2/histocat/) with nuclei and membrane channels coloured in red and green, respectively.
 
-*Output files*:
-**Segmentation example:**
-
-![Segmentation example](images/segmentation.png)
-
-Example of the steps in segmentation.cppipe, with nuclei image input from full_stack_preprocessing and membrane probability input from ilastik, to generate the resulting cell mask (mask overlay image created in [HistoCAT](http://www.bodenmillerlab.com/research-2/histocat/ 'HistoCAT') with nuclei and membrane channels coloured in red and green respectively).
+![Segmentation](images/segmentation.png)
 
 ## Example output
 
