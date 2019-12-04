@@ -50,6 +50,22 @@ Once you have created/obtained the files required to run the pipeline, the direc
 Providing you have installed the version of Nextflow required by the pipeline, and you either have Docker or Singularity installed and available on the `PATH`, you can then execute the pipeline on your compute infrastructure using the command below:
 
 ```bash
+.
+├── inputs
+│   ├── metadata.csv
+│   └── sample_name.mcd
+└── plugins
+    ├── cp_plugins
+    │   ├── measureobjectintensitymultichannel.py
+    │   └── smoothmultichannel.py
+    ├── full_stack_preprocessing.cppipe
+    ├── ilastik_stack_preprocessing.cppipe
+    ├── ilastik_training_params.ilp
+    └── segmentation.cppipe
+```
+
+
+```bash
 nextflow run nf-core/imcyto \
     --input "./mcd/*.mcd" \
     --metadata './mcd/metadata.csv' \
