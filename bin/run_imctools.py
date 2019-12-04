@@ -37,28 +37,28 @@ HEADER = ['metal', 'full_stack', 'ilastik_stack']
 fin = open(args.METADATA_FILE,'r')
 header = fin.readline().strip().split(',')
 if header != HEADER:
-	print("{} header: {} != {}".format(ERROR_STR,','.join(header),','.join(HEADER)))
-	sys.exit(1)
+    print("{} header: {} != {}".format(ERROR_STR,','.join(header),','.join(HEADER)))
+    sys.exit(1)
 
 metalDict = {}
 for line in fin.readlines():
-	lspl = line.strip().split(',')
-	metal,fstack,istack = lspl
+    lspl = line.strip().split(',')
+    metal,fstack,istack = lspl
 
-	## CHECK THREE COLUMNS IN LINE
-	if len(lspl) != len(HEADER):
-		print("{}: Invalid number of columns - should be 3!\nLine: '{}'".format(ERROR_STR,line.strip()))
-		sys.exit(1)
+    ## CHECK THREE COLUMNS IN LINE
+    if len(lspl) != len(HEADER):
+        print("{}: Invalid number of columns - should be 3!\nLine: '{}'".format(ERROR_STR,line.strip()))
+        sys.exit(1)
 
-	## CHECK VALID INCLUDE/EXCLUDE CODES
-	if fstack not in ['0','1'] or istack not in ['0','1']:
-		print("{}: Invalid column code - should be 0 or 1!\nLine: '{}'".format(ERROR_STR,line.strip()))
-		sys.exit(1)
+    ## CHECK VALID INCLUDE/EXCLUDE CODES
+    if fstack not in ['0','1'] or istack not in ['0','1']:
+        print("{}: Invalid column code - should be 0 or 1!\nLine: '{}'".format(ERROR_STR,line.strip()))
+        sys.exit(1)
 
-	## CREATE DICTIONARY
-	metal = metal.upper()
-	if metal not in metalDict:
-		metalDict[metal] = [bool(int(x)) for x in [fstack,istack]]
+    ## CREATE DICTIONARY
+    metal = metal.upper()
+    if metal not in metalDict:
+    metalDict[metal] = [bool(int(x)) for x in [fstack,istack]]
 fin.close()
 
 ## OUTPUT FILE LINKING ROI IDS TO ROI LABELS (IMAGE DESCRIPTION)
