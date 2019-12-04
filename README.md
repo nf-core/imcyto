@@ -17,6 +17,21 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 4. Use composite tiff to classify pixels as membrane, nuclei or background, and save probabilities map as tiff ([`Ilastik`](https://www.ilastik.org/); `--ilastik_training_ilp` parameter; *optional*)
 5. Use probability tiffs and preprocessed full stack tiffs for single cell segmentation to generate a cell mask as tiff and then overlay cell mask onto full stack tiff images to extract single cell information generating a csv file ([`CellProfiler`](https://cellprofiler.org/); `--segmentation_cppipe` parameter)
 
+## Pipeline Summary:
+
+1. **(IMCTools)** Generate .tiff files from image acquisition output: Open .mcd, .ome.tiff or .txt files and contained ROIs and save individual .tiff files for channels with names matching those defined in a metadata.csv file into corresponding folders – full_stack for all channels being analysed in single cell expression analysis; ilastik_stack for channels being used to generate the cell mask.
+
+2. **(CellProfiler – full_stack_preprocessing.cppipe)** Preprocess full_stack images: Apply preprocessing filters to all .tiff files in the full_stack folder and save.
+
+3. **(CellProfiler – ilastik_stack_preprocessing.cppipe)** Generate a composite image representive of all cells plasma membranes: Merge select .tiff images from the ilastik_stack subfolder to create a composite RGB image of cell nuclei and plasma membranes and save as a composite.tiff.
+
+4. **(Ilastik)** Apply pixel classification to the composite cell map: Use composite.tiff to classify pixels as membrane, nuclei or background, and save probability maps as .tiffs.
+*Alternative option to skip ilastik pixel classification and use composite.tiff instead of probabilty .tiff in subequent steps. This approach might be preferred if CellProfiler modules alone are deemed sufficient to achieve a reliable segmentation mask.*
+
+5. **(CellProfiler – segmentation.cppipe)** Generate a single cell mask: Use probability .tiffs and pre-processed full_stack .tiffs for single cell segmentation to generate a cell mask.
+
+6. **(CellProfiler – segmentation.cppipe)** Output single cell expression data: Overlay cell mask onto full_stack .tiff images to extract single cell information generating a csv file.
+
 ## Quick Start
 
 i. Install [`nextflow`](https://nf-co.re/usage/installation)
