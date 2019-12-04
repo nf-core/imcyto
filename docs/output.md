@@ -60,7 +60,7 @@ nextflow run nf-core/imcyto \
     -profile <docker/singularity/institute>
 ```
 
-Nextflow will download the pipeline and associated software containers in order to execute the pipeline.
+Nextflow will download the pipeline and associated software containers in order to execute the pipeline. See [Adding your own cluster configuration](https://nf-co.re/usage/adding_own_config) for tips on how to customise the pipeline execution for your compute infrastructure.
 
 ## Inputs/outputs
 
