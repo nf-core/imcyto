@@ -126,7 +126,7 @@ Path to input data file(s) (globs must be surrounded with quotes). Currently sup
 
 ### `--metadata`
 
-Path to metadata `csv` file indicating which images to merge in full stack and/or Ilastik stack.
+Path to metadata `csv` file indicating which images to merge in full and/or Ilastik stack. The file should only contain 3 columns i.e. 'metal', 'full_stack' and 'ilastik_stack'. The `metal` column should contain all the metals used in your antibody panel. The `full_stack` and `ilastik_stack` entries should be `1` or `0` to indicate whehter to include or exclude a metal for a given stack, respectively. See [`metadata.csv`](https://github.com/nf-core/test-datasets/blob/imcyto/inputs/metadata.csv) for an example.
 
 ```bash
 --metadata 'metadata.csv'
