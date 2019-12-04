@@ -2,8 +2,6 @@
 
 ## Pipeline overview
 
-![workflow schematic](images/schematic.png)
-
 The pipeline is built using [Nextflow](https://www.nextflow.io/). See main [`README.md`](../README.md#pipeline-summary) for a condensed overview of the steps in the pipeline, and the bioinformatics tools used at each step.
 
 This is an automated pipeline for the pre-processing and single cell segmentation of imaging data generated from Imaging Mass Cytometry experiments, however, it is flexible enough to be applicable to other types of imaging data (e.g. confocal).
@@ -13,6 +11,10 @@ The input to the pipeline can be in either `mcd`, `ome.tiff` or `txt` file forma
 The [plugins](../assets/plugins/) supplied with the pipeline constitute the minimal requirements to generate a single cell mask. A more refined and comprehensive pipeline will be uploaded in due course.
 
 This pipeline is designed to run on most compute infrastructures without the need to pre-install any of the software packages. However, in order to initially create the custom plugin files required by the pipeline, one needs to install the latest GUI versions of [CellProfiler](https://cellprofiler.org/releases/) and [Ilastik](https://www.ilastik.org/download.html) on a local machine (see [Pipeline Adaptations](#pipeline-adaptations)).  
+
+## Pipeline schematic
+
+![workflow schematic](images/schematic.png)
 
 ## Pipeline Prerequisites:
 
