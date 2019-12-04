@@ -24,11 +24,11 @@ This pipeline is designed to run on most compute infrastructures without the nee
 
 - CellProfiler `cppipe` files with the "NamesAndTypes" module edited to match your antibody panel and desired markers for the identification of cell nuclei and membranes (see [Pipeline adaptations](#pipeline-adaptations)). Other recommended changes to the pipeline are outlined in the [Pipeline details](#pipeline-details) section.
 
-- NOTE: ILASTIK ILP FILE DESCRIPTION?
+- **NOTE: ILASTIK ILP FILE DESCRIPTION?**
 
 ## Pipeline adaptations
 
-- To view and edit the .cppipe files, download [CellProfiler(v3.1.8)](https://cellprofiler.org/ 'CellProfiler') as well as the custom plugins created by Bodenmiller group - smoothmultichannel.py and measureobjectintensitymultichannel.py (found [here](https://github.com/BodenmillerGroup/ImcPluginsCP 'CellProfiler Bodenmiller custom plugins')). Your own custom plugins can also be used. Open CellProfiler>Preferences and change ‘CellProfiler plugins directory’ path to where you stored the custom plugins. When saving the edited .cppipe files, make to sure export the file as a .cppipe and to name the files as either ‘full_stack_preprocessing’, ‘ilastik_stack_preprocessing’ or ‘segmentation’ in line with the schematic above.
+- To view and edit the `cppipe` files required by the pipeline you can download and install [CellProfiler](https://cellprofiler.org/releases/) locally. Custom CellProfiler plugins created by the Bodenmiller group (e.g `smoothmultichannel.py` and `measureobjectintensitymultichannel.py`) can be found [here](https://github.com/BodenmillerGroup/ImcPluginsCP)). Your can also create and use you own custom plugins. Open "CellProfiler > Preferences" and change the "CellProfiler plugins directory" path to where you have stored the custom plugins. When saving the edited `cppipe` files, make sure to export the file as a `cppipe`. If you would like to follow the naming convention in the schematic above you can name the files as either "full_stack_preprocessing", "ilastik_stack_preprocessing" or "segmentation".
 
 - If you use any custom modules in any of the CellProfiler .cppipe files, make sure to add the python script into the ‘plugins/cp_plugins’ directory before running the pipeline (described below – **Pipeline Execution**).
 
