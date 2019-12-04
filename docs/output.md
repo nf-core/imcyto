@@ -10,7 +10,7 @@ The input to the pipeline can be in either `mcd`, `ome.tiff` or `txt` file forma
 
 The [plugins](../assets/plugins/) supplied with the pipeline constitute the minimal requirements to generate a single cell mask. A more refined and comprehensive pipeline will be uploaded in due course.
 
-This pipeline is designed to run on most compute infrastructures without the need to pre-install any of the software packages. However, in order to initially create the custom plugin files required by the pipeline, one needs to install the latest GUI versions of [CellProfiler](https://cellprofiler.org/releases/) and [Ilastik](https://www.ilastik.org/download.html) on a local machine (see [Pipeline Adaptations](#pipeline-adaptations)).  
+This pipeline is designed to run on most compute infrastructures without the need to pre-install any of the software packages. However, in order to initially create the custom plugin files required by the pipeline, one needs to install the latest GUI versions of [CellProfiler](https://cellprofiler.org/releases/) and [Ilastik](https://www.ilastik.org/download.html) on a local machine (see [Pipeline adaptations](#pipeline-adaptations)).  
 
 ## Pipeline schematic
 
@@ -18,13 +18,13 @@ This pipeline is designed to run on most compute infrastructures without the nee
 
 ## Pipeline prerequisites
 
-- `mcd`, `ome.tiff` or `txt` data file(s) without any spaces in the file name. Associated antibody panel should contain metal and antibody information in the form of "metal_antibody" e.g. `89Y_CD45`.
+- `mcd`, `ome.tiff` or `txt` data file(s) without any spaces in the file name. Associated antibody panel should contain metal and antibody information in the form of "metal_antibody" e.g. "89Y_CD45".
 
-- **metadata.csv** file containing your antibody panel to identify which corresponding .tiff files are to be put into full_stack and ilastik_stack folders (example shown in **Pipeline Workflow Schematic**). File should contain only three columns titled ‘metal’, ‘full_stack’ and ‘ilastik_stack’. ‘metal’ column should contain all the metals used in your antibody panel. ‘full_stack’ and ‘ilastik_stack’ columns should be used to identify which metals to include in boolean labelling (1 = use or 0 = don’t use).
+- `metadata.csv` file containing your antibody panel to identify which corresponding `tiff` files are to be used for the full and Ilastik stacks (see [`--metadata.csv`](../usage.md#--metadata))
 
 - **‘NamesAndTypes’** module in all CellProfiler .cppipe files (see **Pipeline Adaptations**) will need to be edited to match your antibody panel and desired markers to identify cell nuclei and membranes. Other recommended changes to the pipeline are outlined below - **Pipeline Details**.
 
-## Pipeline Adaptations:
+## Pipeline adaptations
 
 - To view and edit the .cppipe files, download [CellProfiler(v3.1.8)](https://cellprofiler.org/ 'CellProfiler') as well as the custom plugins created by Bodenmiller group - smoothmultichannel.py and measureobjectintensitymultichannel.py (found [here](https://github.com/BodenmillerGroup/ImcPluginsCP 'CellProfiler Bodenmiller custom plugins')). Your own custom plugins can also be used. Open CellProfiler>Preferences and change ‘CellProfiler plugins directory’ path to where you stored the custom plugins. When saving the edited .cppipe files, make to sure export the file as a .cppipe and to name the files as either ‘full_stack_preprocessing’, ‘ilastik_stack_preprocessing’ or ‘segmentation’ in line with the schematic above.
 
