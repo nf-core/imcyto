@@ -4,11 +4,11 @@
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/). See main [`README.md`](../README.md#pipeline-summary) for a condensed overview of the steps in the pipeline, and the bioinformatics tools used at each step.
 
-This is an automated pipeline for the pre-processing and single cell segmentation of imaging data generated from Imaging Mass Cytometry experiments, however, it is flexible enough to be applicable to other types of imaging data (e.g. confocal).
+This is an automated ‘Plug and Play’ image analysis pipeline that sequentially pre-processes and single cell segments imaging data to extract single cell expression data. This pipeline was generated for Imaging Mass Cytometry experiments, however, it is flexible enough to be applicable to other types of imaging data (e.g. immunofluorescence/immunohistochemistry data).
 
 The input to the pipeline can be in either `mcd`, `ome.tiff` or `txt` file format from which stacks of `tiff` files are generated for subsequent analysis. The various stages of this pipeline allow the `tiff` images to be pre-processed, and segmented using multiple CellProfiler `cppipe` project files and the pixel-classification software Ilastik. The concept of this step-wise image segmentation by combining Ilastik with CellProfiler was based on the analysis pipeline as described by the Bodenmiller group [(Zanotelli & Bodenmiller, Jan 2019)](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf).
 
-The [plugins](../assets/plugins/) supplied with the pipeline constitute the minimal requirements to generate a single cell mask. A more refined and comprehensive pipeline will be uploaded in due course.
+The project files supplied with the pipeline constitute the minimal requirements to generate a single cell mask. A more refined and comprehensive pipeline will be uploaded in due course.
 
 This pipeline is designed to run on most compute infrastructures without the need to pre-install any of the software packages. However, in order to initially create the custom plugin files required by the pipeline, one needs to install the latest GUI versions of [CellProfiler](https://cellprofiler.org/releases/) and [Ilastik](https://www.ilastik.org/download.html) on a local machine (see [Customising inputs](#customising-inputs)).
 
@@ -16,8 +16,7 @@ This pipeline is designed to run on most compute infrastructures without the nee
 
 ![workflow schematic](images/schematic.png)
 
-* **NOTE: REMOVE SPACE AFTER IMAGE AND ADD PIPELINE DAG TOO?**
-* **NOTE: MAKE IMAGES SMALLER**
+* **NOTE: REMOVE SPACE AFTER IMAGE AND ADD PIPELINE DAG TOO? - whats a pipeline DAG?**
 
 ## File prerequisites
 
@@ -26,8 +25,6 @@ This pipeline is designed to run on most compute infrastructures without the nee
 2. `metadata.csv` file containing your antibody panel to identify which `tiff` files are to be used for the full and Ilastik stacks. See [`--metadata.csv`](usage.md#--metadata) for the required file format.
 
 3. CellProfiler `cppipe` files with the "NamesAndTypes" module edited to match your antibody panel and desired markers for the identification of cell nuclei and membranes (see [Customising inputs](#customising-inputs)). Other recommended changes to the pipeline are outlined in the [Pipeline details](#pipeline-details) section.
-
-4. **NOTE: ILASTIK ILP FILE DESCRIPTION?**
 
 ## Customising inputs
 
@@ -59,6 +56,8 @@ Once you have created/obtained the files required to run the pipeline, the direc
     ├── ilastik_training_params.ilp
     └── segmentation.cppipe
 ```
+**When running Mihaelas updated version the input file was called 'data' and the metadata.csv was outside in the main folder not in the data folder.
+Also what happens when you run a mix of file types in the same folder? In this case remember to include ROI number in the txt/tiff file name (as mcd creates multiple ROI folders and it could get confusing if you are running similarly titled mcd's and txt/tiff in same/seperate runs).**
 
 Providing you have installed the version of Nextflow required by the pipeline, and you either have Docker or Singularity installed and available on the `PATH`, you can then execute the pipeline on your compute infrastructure using the command below:
 
@@ -112,7 +111,7 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 *Description*:  
 
-* This step selects all images in `full_stack` folder and sequentially processes them through various filtering methods, including removal of hot pixels and median filter, and then saves all files.
+* This step selects all images in `full_stack` folder and sequentially processes them through various filtering methods, including removal of hot pixels and median filtering, and then saves all files.
 * These image filtering parameters can be changed by opening and customising the `cppipe` file in CellProfiler.
 * To keep your data raw, uncheck all the modules except "SaveImages". This will simply re-save the unchanged input images into the correct place for the next step in the pipeline.
 * Make sure to export a `cppipe` file.
@@ -167,7 +166,7 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 *Description*:  
 
 * Open .cppipe file in CellProfiler to change names of input images in ‘NamesAndTypes’ to match your antibody panel, making sure to keep "_Probabilities_0" as prob_membrane and "_Probabilities_2" as prob_background.
-* Currently, this process uses the nuclear image to identify nuclei as primary objects, subtracts background probability from the membrane probability image and then uses both identified nuclei and membrane probability to identify whole cells as secondary objects. These cell objects are then converted into a unit16 image to generate the cell mask and saved. The cell mask is then used to measure size and shape information of all cell objects, and extract single cell expression data.
+* Currently, this process uses the nuclear image to identify nuclei as primary objects, subtracts background probability from the membrane probability image and then uses both identified nuclei and membrane probability to identify whole cells as secondary objects. These cell objects are then converted into a uint16 image to generate the cell mask and saved. The cell mask is then used to measure size and shape information of all cell objects, and extract single cell expression data.
 * You may need to adapt parameters present in "IdentifyPrimaryObjects" and "IdentifySecondaryObjects" modules to best suit your data. Common changes include typical diameter size in pixels of nuclear objects, thresholding strategy and method to distinguish clumped objects. Alternatively, one can opt for using the nuclei probability output ("_Probabilities_1") from Ilastik to identify the nuclei as primary objects.
 * Within "MeasureObjectIntensity Multichannel" you will need to select all the images that you would like the intensity to be measured for.
 * Further parameters can be customised, such as the desired measurements to export in "ExportToSpreadsheet". Currently this pipeline exports data only for each cell object: area, mean intensity, object center location and object number.
@@ -192,11 +191,11 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 ## Example pipeline output
 
-Cell mask overlay image created in [HistoCAT](http://www.bodenmillerlab.com/research-2/histocat/) with nuclei and membrane channels coloured in red and green, respectively.
+Cell mask overlay image created in [HistoCAT](http://www.bodenmillerlab.com/research-2/histocat/) with nuclei, tumour cells and nontumour cells channels coloured in red, green and blue, respectively.
 
 ![cell mask](images/cells_mask.png)
 
-Output `csv` file containing each object and measured mean intensities:
+Output `csv` file containing each cell object and measured mean intensities:
 
 ![cell csv](images/cells_csv.png)
 
