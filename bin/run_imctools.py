@@ -10,7 +10,6 @@ import imctools.io.txtparser as txtparser
 import imctools.io.ometiffparser as omeparser
 import imctools.io.mcdxmlparser as meta
 
-
 ############################################
 ############################################
 ## PARSE ARGUMENTS
@@ -78,7 +77,7 @@ else:
 	elif file_type == "tiff" or file_type == "tif":
 		parser = omeparser.OmetiffParser(args.INPUT_FILE)
 	else:
-		print("{}: Invalid input file type - should be txt, tiff, or mcd!".file_type)
+		print("{}: Invalid input file type - should be txt, tiff, or mcd!".format(file_type))
         sys.exit(1)
 
 	# THERE IS ONLY ONE ACQUISITION - ROI FOLDER NAMED ACCORDING TO INPUT FILENAME
@@ -110,7 +109,7 @@ for roi_number in acids:
 			img = imc_ac.get_image_writer(filename=os.path.join("roi_%s" % (roi_number), "%s.ome.tiff" % j), metals=metal_stack)
 			img.save_image(mode='ome', compression=0, dtype=None, bigtiff=False)
         else:
-			print("{} None of the metals exists in metasheet file for", j)
+			print("None of the metals exists in metasheet file for {}".format(j))
 			sys.exit(1)
 
 		for l, m in zip(imc_ac.channel_labels, imc_ac.channel_metals):
