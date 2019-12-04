@@ -58,7 +58,7 @@ The typical command for running the pipeline is as follows:
 
 ```bash
 nextflow run nf-core/imcyto \
-    --input "./mcd/*.mcd" \
+    --input "./data/*.mcd" \
     --metadata 'metadata.csv' \
     --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
     --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \

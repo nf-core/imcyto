@@ -41,7 +41,7 @@ iv. Start running your own analysis!
 <!-- TODO nf-core: Update the default command above used to run the pipeline -->
 ```bash
 nextflow run nf-core/imcyto \
-    --input "./mcd/*.mcd" \
+    --input "./data/*.mcd" \
     --metadata 'metadata.csv' \
     --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
     --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
