@@ -191,7 +191,7 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 ## Example pipeline output
 
-Cell mask overlay image created in [HistoCAT](http://www.bodenmillerlab.com/research-2/histocat/) with nuclei, tumour cells and nontumour cells channels coloured in red, green and blue, respectively.
+Cell mask overlay image created in [HistoCAT](http://www.bodenmillerlab.com/research-2/histocat/) with nuclei, tumour cells and non-tumour cell channels coloured in red, green and blue, respectively.
 
 ![cell mask](images/cells_mask.png)
 
