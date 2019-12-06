@@ -74,7 +74,6 @@ The pipeline was developed by [Harshil Patel](mailto:harshil.patel@crick.ac.uk) 
 
 Many thanks to others who contributed as a result of the Crick Data Challenge (Jan 2019) - Gavin Kelly, Becky Saunders, Katey Enfield, Alix Lemarois, Nuria Folguera Blasco, Andre Altmann.
 
-**NOTE: Maybe we should ask before adding everyones email here? Also maybe it's better to link everyones github profile instead - I dont even know if ill be at the Crick in a years time so dont really want that email here.**
 
 It would not have been possible to develop this pipeline without the guidelines, scripts and plugins provided by the [Bodenmiller Lab](http://www.bodenmillerlab.com/). Thank you too!
 
