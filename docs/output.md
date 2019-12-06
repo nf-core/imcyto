@@ -4,7 +4,7 @@
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/). See main [`README.md`](../README.md#pipeline-summary) for a condensed overview of the steps in the pipeline, and the bioinformatics tools used at each step.
 
-This is an automated ‘Plug and Play’ image analysis pipeline that sequentially pre-processes and single cell segments imaging data to extract single cell expression data. This pipeline was generated for Imaging Mass Cytometry experiments, however, it is flexible enough to be applicable to other types of imaging data (e.g. immunofluorescence/immunohistochemistry data).
+This is an automated image analysis pipeline that sequentially pre-processes and single cell segments imaging data to extract single cell expression data. This pipeline was generated for Imaging Mass Cytometry experiments, however, it is flexible enough to be applicable to other types of imaging data (e.g. immunofluorescence/immunohistochemistry data).
 
 The input to the pipeline can be in either `mcd`, `ome.tiff` or `txt` file format from which stacks of `tiff` files are generated for subsequent analysis. The various stages of this pipeline allow the `tiff` images to be pre-processed, and segmented using multiple CellProfiler `cppipe` project files and the pixel-classification software Ilastik. The concept of this step-wise image segmentation by combining Ilastik with CellProfiler was based on the analysis pipeline as described by the Bodenmiller group [(Zanotelli & Bodenmiller, Jan 2019)](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf).
 
