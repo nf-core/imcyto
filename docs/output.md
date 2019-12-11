@@ -16,8 +16,6 @@ This pipeline is designed to run on most compute infrastructures without the nee
 
 ![workflow schematic](images/schematic.png)
 
-* **NOTE: REMOVE SPACE AFTER IMAGE AND ADD PIPELINE DAG TOO? - whats a pipeline DAG?**
-
 ## File prerequisites
 
 1. `mcd`, `ome.tiff` or `txt` data file(s) without any spaces in the file names. Associated antibody panel should contain metal and antibody information in the form of "metal_antibody" e.g. "89Y_CD45".
@@ -45,18 +43,19 @@ Once you have created/obtained the files required to run the pipeline, the direc
 ```bash
 .
 ├── inputs
-│   ├── metadata.csv
-│   └── sample_name.mcd
+│   ├── metadata.csv
+│   └── sample_name.mcd
 └── plugins
     ├── cp_plugins
-    │   ├── measureobjectintensitymultichannel.py
-    │   └── smoothmultichannel.py
+    │   ├── measureobjectintensitymultichannel.py
+    │   └── smoothmultichannel.py
     ├── full_stack_preprocessing.cppipe
     ├── ilastik_stack_preprocessing.cppipe
     ├── ilastik_training_params.ilp
     └── segmentation.cppipe
 ```
-Also what happens when you run a mix of file types in the same folder? In this case remember to include ROI number in the txt/tiff file name (as mcd creates multiple ROI folders and it could get confusing if you are running similarly titled mcd's and txt/tiff in same/seperate runs).**
+
+<!-- TODO nf-core: Also what happens when you run a mix of file types in the same folder? In this case remember to include ROI number in the txt/tiff file name (as mcd creates multiple ROI folders and it could get confusing if you are running similarly titled mcd's and txt/tiff in same/seperate runs). -->
 
 Providing you have installed the version of Nextflow required by the pipeline, and you either have Docker or Singularity installed and available on the `PATH`, you can then execute the pipeline on your compute infrastructure using the command below:
 
