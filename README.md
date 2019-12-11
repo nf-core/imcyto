@@ -40,6 +40,7 @@ nextflow run nf-core/imcyto -profile test,<docker/singularity/institute>
 iv. Start running your own analysis!
 
 <!-- TODO nf-core: Update the default command above used to run the pipeline -->
+
 ```bash
 nextflow run nf-core/imcyto \
     --input "./inputs/*.mcd" \
