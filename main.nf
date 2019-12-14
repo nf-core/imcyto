@@ -48,6 +48,7 @@ def helpMessage() {
     AWSBatch options:
       --awsqueue [str]                The AWSBatch JobQueue that needs to be set when running on AWSBatch
       --awsregion [str]               The AWS Region for your AWS Batch job to run on
+      --awscli [str]                  Path to the AWS CLI tool
     """.stripIndent()
 }
 
@@ -143,9 +144,10 @@ summary['Config Profile']               = workflow.profile
 if (params.config_profile_description) summary['Config Description'] = params.config_profile_description
 if (params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
 if (params.config_profile_url)         summary['Config URL']         = params.config_profile_url
-if (workflow.profile == 'awsbatch') {
+if (workflow.profile.contains('awsbatch')) {
   summary['AWS Region']                = params.awsregion
   summary['AWS Queue']                 = params.awsqueue
+  summary['AWS CLI']                   = params.awscli
 }
 if (params.email || params.email_on_fail) {
   summary['E-mail Address']     = params.email
