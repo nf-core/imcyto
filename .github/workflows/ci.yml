@@ -15,8 +15,18 @@ jobs:
       - name: Install Nextflow
         run: |
           export NXF_VER=${{ matrix.nxf_ver }}
+          export NXF_ANSI_LOG=false
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Run test
+      #- name: Pull image (Cant pull standard single image for this pipeline as we are using individual BioContainers)
+      #  run: |
+      #    docker pull nfcore/imcyto:dev && docker tag nfcore/imcyto:dev nfcore/imcyto:dev
+      - name: Run the pipeline with .mcd input
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -ansi-log false -profile test,docker
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+      - name: Run the pipeline with .txt input
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_txt,docker
+      - name: Run the pipeline with .tiff input
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tiff,docker
