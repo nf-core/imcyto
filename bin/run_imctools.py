@@ -107,7 +107,7 @@ for roi_number in acids:
 
         if len(metal_stack) > 0:
             img = imc_ac.get_image_writer(filename=os.path.join("roi_%s" % (roi_number), "%s.ome.tiff" % j), metals=metal_stack)
-            img.save_image(mode='ome', compression=0, dtype=None, bigtiff=True)
+            img.save_image(mode='ome', compression=0, dtype=None, bigtiff=False)
         else:
             print("None of the metals exists in metasheet file for {}".format(j))
             sys.exit(1)
