@@ -107,7 +107,7 @@ for roi_number in acids:
 
         if len(metal_stack) > 0:
             img = imc_ac.get_image_writer(filename=os.path.join("roi_%s" % (roi_number), "%s.ome.tiff" % j), metals=metal_stack)
-            img.save_image(mode='ome', compression=0, dtype=None, bigtiff=False)
+            img.save_image(mode='ome', compression=0, dtype=None, bigtiff=True)
         else:
             print("None of the metals exists in metasheet file for {}".format(j))
             sys.exit(1)
@@ -121,7 +121,7 @@ for roi_number in acids:
             if len(metal) == 1:
                 if metalDict[metal[0]][i]:
                     img = imc_ac.get_image_writer(filename=os.path.join(dirname,filename), metals=[m])
-                    img.save_image(mode='ome', compression=0, dtype=None, bigtiff=False)
+                    img.save_image(mode='ome', compression=0, dtype=None, bigtiff=True)
             elif len(metal) > 1:
                 print("{} metal has multiple matches found".format(metal_label))
             elif len([ entry for entry in metalDict if metal_label.upper().startswith(entry)]) == 0:
