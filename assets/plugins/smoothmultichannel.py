@@ -32,6 +32,7 @@ from centrosome.smooth import circular_gaussian_kernel
 from centrosome.smooth import fit_polynomial
 from centrosome.smooth import smooth_with_function_and_mask
 import skimage.restoration
+from scipy import ndimage
 
 import cellprofiler.image as cpi
 import cellprofiler.module as cpm
@@ -41,6 +42,7 @@ from cellprofiler.setting import YES, NO
 
 FIT_POLYNOMIAL = 'Fit Polynomial'
 MEDIAN_FILTER = 'Median Filter'
+MEDIAN_FILTER_SCIPY = 'Median Filter Scipy'
 GAUSSIAN_FILTER = 'Gaussian Filter'
 SMOOTH_KEEPING_EDGES = 'Smooth Keeping Edges'
 CIRCULAR_AVERAGE_FILTER = 'Circular Average Filter'
@@ -60,7 +62,7 @@ class SmoothMultichannel(cpm.Module):
 
         self.smoothing_method = cps.Choice(
                 'Select smoothing method',
-                [CLIP_HOT_PIXELS, FIT_POLYNOMIAL, GAUSSIAN_FILTER, MEDIAN_FILTER, SMOOTH_KEEPING_EDGES,
+                [CLIP_HOT_PIXELS, FIT_POLYNOMIAL, GAUSSIAN_FILTER, MEDIAN_FILTER, MEDIAN_FILTER_SCIPY, SMOOTH_KEEPING_EDGES,
                  CIRCULAR_AVERAGE_FILTER, SM_TO_AVERAGE], doc="""\
 This module smooths images using one of several filters. Fitting a
 polynomial is fastest but does not allow a very tight fit compared to
@@ -86,6 +88,10 @@ the other methods:
 -  *%(MEDIAN_FILTER)s:* This method finds the median pixel value within
    the diameter you specify. It removes bright or dim features
    that are significantly smaller than the specified diameter.
+-  *%(MEDIAN_FILTER_SCIPY)s:* This method finds the median pixel value within
+   the diameter you specify. The scipy inplementation has been taken, as the centrosome
+   one has problems with small diameter artifacts (=single pixel artefacts)
+   Does NOT work with masked images!
 -  *%(SMOOTH_KEEPING_EDGES)s:* This method uses a bilateral filter
    which limits Gaussian smoothing across an edge while applying
    smoothing perpendicular to an edge. The effect is to respect edges in
@@ -274,6 +280,8 @@ example, if one wants to set a threshold of 100 counts, a value of either
         elif self.smoothing_method.value == MEDIAN_FILTER:
             output_pixels = median_filter(pixel_data, image.mask,
                                           object_size / 2 + 1)
+        elif self.smoothing_method.value == MEDIAN_FILTER_SCIPY:
+            output_pixels = ndimage.median_filter(pixel_data, int(np.ceil(object_size / 2 + 1)))
         elif self.smoothing_method.value == SMOOTH_KEEPING_EDGES:
             sigma_range = float(self.sigma_range.value)
 

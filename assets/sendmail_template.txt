@@ -9,12 +9,12 @@ Content-Type: text/html; charset=utf-8
 $email_html
 
 --nfcoremimeboundary
-Content-Type: image/png;name="nfcore-imcyto_logo.png"
+Content-Type: image/png;name="nf-core-imcyto_logo.png"
 Content-Transfer-Encoding: base64
-Content-ID: <nfcoreimcytologo>
-Content-Disposition: inline; filename="nfcore-imcyto_logo.png"
+Content-ID: <nfcorepipelinelogo>
+Content-Disposition: inline; filename="nf-core-imcyto_logo.png"
 
-<% out << new File("$baseDir/assets/nfcore-imcyto_logo.png").
+<% out << new File("$baseDir/assets/nf-core-imcyto_logo.png").
   bytes.
   encodeBase64().
   toString().
