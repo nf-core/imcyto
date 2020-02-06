@@ -391,32 +391,6 @@ process output_documentation {
 }
 
 /*
- * Parse software version numbers
- */
-process get_software_versions {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
-        saveAs: { filename ->
-                      if (filename.indexOf(".csv") > 0) filename
-                      else null
-                }
-
-    input:
-    file imctools from ch_imctools_version.first()
-    file cellprofiler from ch_cellprofiler_version.first()
-    file ilastik from ch_ilastik_version.first().ifEmpty([])
-
-    output:
-    file "software_versions.csv"
-
-    script:
-    """
-    echo $workflow.manifest.version > pipeline_version.txt
-    echo $workflow.nextflow.version > nextflow_version.txt
-    scrape_software_versions.py &> software_versions_mqc.yaml
-    """
-}
-
-/*
  * Completion e-mail notification
  */
 workflow.onComplete {
@@ -424,7 +398,7 @@ workflow.onComplete {
     // Set up the e-mail variables
     def subject = "[nf-core/imcyto] Successful: $workflow.runName"
     if (!workflow.success) {
-      subject = "[nf-core/imcyto] FAILED: $workflow.runName"
+        subject = "[nf-core/imcyto] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -445,10 +419,15 @@ workflow.onComplete {
     if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
     if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
     if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-    if (workflow.container) email_fields['summary']['Docker image'] = workflow.container
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
+
+    // Check if we are only sending emails on failure
+    email_address = params.email
+    if (!params.email && params.email_on_fail && !workflow.success) {
+        email_address = params.email_on_fail
+    }
 
     // Check if we are only sending emails on failure
     email_address = params.email
@@ -476,58 +455,58 @@ workflow.onComplete {
     // Send the HTML e-mail
     if (email_address) {
         try {
-          if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
-          // Try to send HTML e-mail using sendmail
-          [ 'sendmail', '-t' ].execute() << sendmail_html
-          log.info "[nf-core/imcyto] Sent summary e-mail to $email_address (sendmail)"
+            if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
+            // Try to send HTML e-mail using sendmail
+            [ 'sendmail', '-t' ].execute() << sendmail_html
+            log.info "[nf-core/imcyto] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
-          // Catch failures and try with plaintext
-          [ 'mail', '-s', subject, email_address ].execute() << email_txt
-          log.info "[nf-core/imcyto] Sent summary e-mail to $email_address (mail)"
+            // Catch failures and try with plaintext
+            [ 'mail', '-s', subject, email_address ].execute() << email_txt
+            log.info "[nf-core/imcyto] Sent summary e-mail to $email_address (mail)"
         }
     }
 
     // Write summary e-mail HTML to a file
     def output_d = new File("${params.outdir}/pipeline_info/")
     if (!output_d.exists()) {
-      output_d.mkdirs()
+        output_d.mkdirs()
     }
     def output_hf = new File(output_d, "pipeline_report.html")
     output_hf.withWriter { w -> w << email_html }
     def output_tf = new File(output_d, "pipeline_report.txt")
     output_tf.withWriter { w -> w << email_txt }
 
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
 
     if (workflow.stats.ignoredCount > 0 && workflow.success) {
-      log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
-      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}"
-      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}"
+        log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
+        log.info "-${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}-"
+        log.info "-${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}-"
     }
 
     if (workflow.success) {
-        log.info "${c_purple}[nf-core/imcyto]${c_green} Pipeline completed successfully${c_reset}"
+        log.info "-${c_purple}[nf-core/imcyto]${c_green} Pipeline completed successfully${c_reset}-"
     } else {
         checkHostname()
-        log.info "${c_purple}[nf-core/imcyto]${c_red} Pipeline completed with errors${c_reset}"
+        log.info "-${c_purple}[nf-core/imcyto]${c_red} Pipeline completed with errors${c_reset}-"
     }
 
 }
 
 def nfcoreHeader() {
     // Log colors ANSI codes
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
     c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
     c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
     c_white = params.monochrome_logs ? '' : "\033[0;37m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
 
     return """    -${c_dim}--------------------------------------------------${c_reset}-
                                             ${c_green},--.${c_black}/${c_green},-.${c_reset}
