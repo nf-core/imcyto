@@ -9,12 +9,15 @@
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
   * [`-profile`](#-profile)
-  * [`--reads`](#--reads)
-  * [`--single_end`](#--single_end)
-* [Reference genomes](#reference-genomes)
-  * [`--genome` (using iGenomes)](#--genome-using-igenomes)
-  * [`--fasta`](#--fasta)
-  * [`--igenomes_ignore`](#--igenomes_ignore)
+  * [`--input`](#--input)
+  * [`--metadata`](#--metadata)
+  * [`--full_stack_cppipe`](#--full_stack_cppipe)
+  * [`--ilastik_stack_cppipe`](#--ilastik_stack_cppipe)
+  * [`--segmentation_cppipe`](#--segmentation_cppipe)
+  * [`--ilastik_training_ilp`](#--ilastik_training_ilp)
+  * [`--compensation_tiff`](#--compensation_tiff)
+  * [`--skip_ilastik`](#--skip_ilastik)
+  * [`--plugins`](#--plugins)
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -26,7 +29,6 @@
   * [`--outdir`](#--outdir)
   * [`--email`](#--email)
   * [`--email_on_fail`](#--email_on_fail)
-  * [`--max_multiqc_email_size`](#--max_multiqc_email_size)
   * [`-name`](#-name)
   * [`-resume`](#-resume)
   * [`-c`](#-c)
@@ -37,7 +39,7 @@
   * [`--max_cpus`](#--max_cpus)
   * [`--plaintext_email`](#--plaintext_email)
   * [`--monochrome_logs`](#--monochrome_logs)
-  * [`--multiqc_config`](#--multiqc_config)
+<!-- TOC END -->
 
 ## Introduction
 
@@ -49,14 +51,20 @@ It is recommended to limit the Nextflow Java virtual machines memory. We recomme
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
-<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
-
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/imcyto --reads '*_R{1,2}.fastq.gz' -profile docker
+nextflow run nf-core/imcyto \
+    --input "./inputs/*.mcd" \
+    --metadata './inputs/metadata.csv' \
+    --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
+    --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
+    --segmentation_cppipe './plugins/segmentation.cppipe' \
+    --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+    --plugins './plugins/cp_plugins/' \
+    -profile <docker/singularity>
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -101,9 +109,6 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
 
-* `conda`
-  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
-  * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `docker`
   * A generic configuration profile to be used with [Docker](http://docker.com/)
   * Pulls software from dockerhub: [`nfcore/imcyto`](http://hub.docker.com/r/nfcore/imcyto/)
@@ -116,83 +121,75 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 
 <!-- TODO nf-core: Document required command line parameters -->
 
-### `--reads`
+### `--input`
 
-Use this to specify the location of your input FastQ files. For example:
-
-```bash
---reads 'path/to/data/sample_*_{1,2}.fastq'
-```
-
-Please note the following requirements:
-
-1. The path must be enclosed in quotes
-2. The path must have at least one `*` wildcard character
-3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.
-
-If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
-
-### `--single_end`
-
-By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are `*.mcd`.
 
 ```bash
---single_end --reads '*.fastq'
+--input "./mcd/*.mcd"
 ```
 
-It is not possible to run a mixture of single-end and paired-end files in one run.
+### `--metadata`
 
-## Reference genomes
-
-The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
-
-### `--genome` (using iGenomes)
-
-There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.
-
-You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
-
-* Human
-  * `--genome GRCh37`
-* Mouse
-  * `--genome GRCm38`
-* _Drosophila_
-  * `--genome BDGP6`
-* _S. cerevisiae_
-  * `--genome 'R64-1-1'`
-
-> There are numerous others - check the config file for more.
-
-Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
-
-The syntax for this reference configuration is as follows:
-
-<!-- TODO nf-core: Update reference genome example according to what is needed -->
-
-```nextflow
-params {
-  genomes {
-    'GRCh37' {
-      fasta   = '<path to the genome fasta file>' // Used if no star index given
-    }
-    // Any number of additional genomes, key is used with --genome
-  }
-}
-```
-
-<!-- TODO nf-core: Describe reference path flags -->
-
-### `--fasta`
-
-If you prefer, you can specify the full path to your reference genome when you run the pipeline:
+Path to metadata `csv` file indicating which images to merge in full and/or Ilastik stack. The file should only contain 3 columns i.e. 'metal', 'full_stack' and 'ilastik_stack'. The `metal` column should contain all the metals used in your antibody panel. The `full_stack` and `ilastik_stack` entries should be `1` or `0` to indicate whehter to include or exclude a metal for a given stack, respectively. See [`metadata.csv`](https://github.com/nf-core/test-datasets/blob/imcyto/inputs/metadata.csv) for an example.
 
 ```bash
---fasta '[path to Fasta reference]'
+--metadata 'metadata.csv'
 ```
 
-### `--igenomes_ignore`
+### `--full_stack_cppipe`
 
-Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`.
+Path to CellProfiler pipeline file required to create full stack (`cppipe` format).
+
+```bash
+--full_stack_cppipe './plugins/full_stack_preprocessing.cppipe'
+```
+
+### `--ilastik_stack_cppipe`
+
+Path to CellProfiler pipeline file required to create Ilastik stack (`cppipe` format).
+
+```bash
+--ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe'
+```
+
+### `--segmentation_cppipe`
+
+Path to CellProfiler pipeline file required for segmentation (`cppipe` format).
+
+```bash
+--segmentation_cppipe './plugins/segmentation.cppipe'
+```
+
+### `--ilastik_training_ilp`
+
+Path to parameter file required by Ilastik (`ilp` format).
+
+```bash
+--ilastik_training_ilp './plugins/ilastik_training_params.ilp'
+```
+
+### `--compensation_tiff`
+
+Path to `tiff` file for compensation analysis during CellProfiler preprocessing steps.
+
+```bash
+--compensation_tiff './tiff/compensation.tiff'
+```
+
+### `--skip_ilastik`
+
+Flag to skip Ilastik processing step.
+
+### `--plugins`
+
+Path to directory with plugin files required for CellProfiler.
+
+```bash
+--plugins './cellprofiler/plugins/'
+```
+
+Default: `assets/plugins`
 
 ## Job resources
 
@@ -228,8 +225,6 @@ Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a 
 
 ## Other command line parameters
 
-<!-- TODO nf-core: Describe any other command line flags here -->
-
 ### `--outdir`
 
 The output directory where the results will be saved.
@@ -241,10 +236,6 @@ Set this parameter to your e-mail address to get a summary e-mail with details o
 ### `--email_on_fail`
 
 This works exactly as with `--email`, except emails are only sent if the workflow is not successful.
-
-### `--max_multiqc_email_size`
-
-Threshold size for MultiQC report to be attached in notification email. If file generated by pipeline exceeds the threshold, it will not be attached (Default: 25MB).
 
 ### `-name`
 
@@ -322,7 +313,3 @@ Set to receive plain-text e-mails instead of HTML formatted.
 ### `--monochrome_logs`
 
 Set to disable colourful command line output and live life in monochrome.
-
-### `--multiqc_config`
-
-Specify a path to a custom MultiQC configuration file.
