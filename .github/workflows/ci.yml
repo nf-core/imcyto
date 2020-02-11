@@ -5,20 +5,21 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['19.10.0', '']
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Install Nextflow
         run: |
-          export NXF_VER=${{ matrix.nxf_ver }}
-          export NXF_ANSI_LOG=false
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      #- name: Pull image (Cant pull standard single image for this pipeline as we are using individual BioContainers)
+      #- name: Pull docker image (Cant pull standard single image for this pipeline as we are using individual BioContainers)
       #  run: |
       #    docker pull nfcore/imcyto:dev && docker tag nfcore/imcyto:dev nfcore/imcyto:dev
       - name: Run the pipeline with .mcd input

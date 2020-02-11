@@ -1,6 +1,7 @@
-# ![nfcore/imcyto](docs/images/nf-core-imcyto_logo.png)
+# ![nf-core/imcyto](docs/images/nf-core-imcyto_logo.png)
 
-[![Build Status](https://travis-ci.com/nf-core/imcyto.svg?branch=master)](https://travis-ci.com/nf-core/imcyto)
+**Image Mass Cytometry analysis pipeline.**.
+
 [![GitHub Actions CI Status](https://github.com/nf-core/imcyto/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/imcyto/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/imcyto/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/imcyto/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
