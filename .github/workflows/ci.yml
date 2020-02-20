@@ -19,12 +19,16 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Pull docker image
+      #- name: Pull docker image (Cant pull standard single image for this pipeline as we are using individual containers)
+      #  run: |
+      #    docker pull nfcore/imcyto:dev
+      #    docker tag nfcore/imcyto:dev nfcore/imcyto:dev
+      - name: Run the pipeline with .mcd input
         run: |
-          docker pull nfcore/imcyto:dev
-          docker tag nfcore/imcyto:dev nfcore/imcyto:dev
-      - name: Run pipeline with test data
-        run: |
-          # TODO nf-core: You can customise CI pipeline run tests as required
-          # (eg. adding multiple test runs with different parameters)
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+      - name: Run the pipeline with .txt input
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_txt,docker
+      - name: Run the pipeline with .tiff input
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tiff,docker
