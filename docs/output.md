@@ -55,8 +55,6 @@ Once you have created/obtained the files required to run the pipeline, the direc
     └── segmentation.cppipe
 ```
 
-<!-- TODO nf-core: Also what happens when you run a mix of file types in the same folder? In this case remember to include ROI number in the txt/tiff file name (as mcd creates multiple ROI folders and it could get confusing if you are running similarly titled mcd's and txt/tiff in same/seperate runs). -->
-
 Providing you have installed the version of Nextflow required by the pipeline, and you either have Docker or Singularity installed and available on the `PATH`, you can then execute the pipeline on your compute infrastructure using the command below:
 
 ```bash
