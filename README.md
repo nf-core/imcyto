@@ -12,8 +12,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 ## Pipeline summary
 
-<!-- TODO nf-core: I think the schematic should also be added here as it nicely illustrates what this pipeline is for. -->
-
 1. Split image acquisition output files (`mcd`, `ome.tiff` or `txt`) by ROI and convert to individual `tiff` files for channels with names matching those defined in user-provided `metadata.csv` file. Full and ilastik stacks will be generated separately for all channels being analysed in single cell expression analysis, and for channels being used to generate the cell mask, respectively ([imctools](https://github.com/BodenmillerGroup/imctools)).
 
 2. Apply pre-processing filters to full stack `tiff` files ([CellProfiler](https://cellprofiler.org/)).
