@@ -3,6 +3,7 @@
 [![GitHub Actions CI Status](https://github.com/nf-core/imcyto/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/imcyto/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/imcyto/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/imcyto/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
+<!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3697959.svg)](https://doi.org/10.5281/zenodo.3697959)  -->
 
 ## Introduction
 
