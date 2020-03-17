@@ -41,6 +41,7 @@ def helpMessage() {
       --skip_ilastik [bool]           Skip Ilastik processing step
       --plugins [file]                Path to directory with plugin files required for CellProfiler. Default: assets/plugins
       --outdir [file]                 The output directory where the results will be saved
+      --publish_dir_mode [str]        Mode for publishing results in the output directory. Available: symlink, rellink, link, copy, copyNoFollow, move (Default: copy)
       --email [email]                 Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       --email_on_fail [email]         Same as --email, except only send mail if the workflow is not successful
       -name [str]                     Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -165,7 +166,7 @@ checkHostname()
 process IMCTools {
     tag "$name"
     label 'process_medium'
-    publishDir "${params.outdir}/imctools/${name}", mode: 'copy',
+    publishDir "${params.outdir}/imctools/${name}", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("version.txt") > 0) null
                       else filename
@@ -228,7 +229,7 @@ ch_ilastik_stack_tiff
 process PreprocessFullStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy',
+    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("version.txt") > 0) null
                       else filename
@@ -266,7 +267,7 @@ process PreprocessFullStack {
 process PreprocessIlastikStack {
     tag "${name}.${roi}"
     label 'process_medium'
-    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
+    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: params.publish_dir_mode
 
     input:
     set val(name), val(roi), file(tiff) from ch_ilastik_stack_tiff
@@ -304,7 +305,7 @@ if (params.skip_ilastik) {
     process Ilastik {
         tag "${name}.${roi}"
         label 'process_medium'
-        publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy',
+        publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.indexOf("version.txt") > 0) null
                           else filename
@@ -347,7 +348,7 @@ if (params.skip_ilastik) {
 process Segmentation {
     tag "${name}.${roi}"
     label 'process_high'
-    publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
+    publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: params.publish_dir_mode
 
     input:
     set val(name), val(roi), file(tiff) from ch_preprocess_full_stack_tiff
@@ -376,7 +377,7 @@ process Segmentation {
  * STEP 6: Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
 
     input:
     file output_docs from ch_output_docs
@@ -394,7 +395,7 @@ process output_documentation {
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf(".csv") > 0) filename
                       else null
