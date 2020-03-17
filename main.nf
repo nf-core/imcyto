@@ -59,7 +59,7 @@ if (params.help) {
 }
 
 // Has the run name been specified by the user?
-//  this has the bonus effect of catching both -name and --name
+// this has the bonus effect of catching both -name and --name
 custom_runName = params.name
 if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
     custom_runName = workflow.runName
@@ -160,7 +160,7 @@ log.info "-\033[2m--------------------------------------------------\033[0m-"
 checkHostname()
 
 /*
- * STEP 1 - IMCTOOLS
+ * STEP 1: imctools
  */
 process IMCTools {
     tag "$name"
@@ -223,7 +223,7 @@ ch_ilastik_stack_tiff
     .set { ch_ilastik_stack_tiff }
 
 /*
-* STEP 2 - PREPROCESS FULL STACK IMAGES WITH CELLPROFILER
+* STEP 2: Preprocess full stack images with CellProfiler
 */
 process PreprocessFullStack {
     tag "${name}.${roi}"
@@ -261,7 +261,7 @@ process PreprocessFullStack {
 }
 
 /*
-* STEP 3 - PREPROCESS ILASTIK STACK IMAGES WITH CELLPROFILER
+* STEP 3: Preprocess Ilastik stack images with CellProfiler
 */
 process PreprocessIlastikStack {
     tag "${name}.${roi}"
@@ -292,7 +292,7 @@ process PreprocessIlastikStack {
 }
 
 /*
- * STEP 4 - ILASTIK
+ * STEP 4: Ilastik
  */
 if (params.skip_ilastik) {
     ch_preprocess_full_stack_tiff
@@ -342,7 +342,7 @@ if (params.skip_ilastik) {
 }
 
 /*
- * STEP 5 - SEGMENTATION WITH CELLPROFILER
+ * STEP 5: Segmentation with CellProfiler
  */
 process Segmentation {
     tag "${name}.${roi}"
@@ -373,7 +373,7 @@ process Segmentation {
 }
 
 /*
- * STEP 6 - Output Description HTML
+ * STEP 6: Output Description HTML
  */
 process output_documentation {
     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
