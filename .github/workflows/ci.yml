@@ -27,7 +27,29 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
 
-  input:
+  parameters:
+    env:
+      NXF_VER: '19.10.0'
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        parameters: [--skip_ilastik]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Nextflow
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      #- name: Pull docker image (Cant pull standard single image for this pipeline as we are using individual containers)
+      #  run: |
+      #    docker pull nfcore/imcyto:dev
+      #    docker tag nfcore/imcyto:dev nfcore/imcyto:1.0.0
+      - name: Run pipeline with various options
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }}
+
+  config:
     env:
       NXF_VER: '19.10.0'
       NXF_ANSI_LOG: false
@@ -45,6 +67,6 @@ jobs:
       #  run: |
       #    docker pull nfcore/imcyto:dev
       #    docker tag nfcore/imcyto:dev nfcore/imcyto:1.0.0
-      - name: Run pipeline with various options
+      - name: Run pipeline with various test configs
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.config }},docker
