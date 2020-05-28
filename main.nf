@@ -225,8 +225,8 @@ ch_ilastik_stack_tiff
     .set { ch_ilastik_stack_tiff }
 
 /*
-* STEP 2: Preprocess full stack images with CellProfiler
-*/
+ * STEP 2: Preprocess full stack images with CellProfiler
+ */
 process PREPROCESS_FULL_STACK {
     tag "${name}.${roi}"
     label 'process_medium'
@@ -263,8 +263,8 @@ process PREPROCESS_FULL_STACK {
 }
 
 /*
-* STEP 3: Preprocess Ilastik stack images with CellProfiler
-*/
+ * STEP 3: Preprocess Ilastik stack images with CellProfiler
+ */
 process PREPROCESS_ILASTIK_STACK {
     tag "${name}.${roi}"
     label 'process_medium'
