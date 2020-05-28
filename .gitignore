@@ -3,4 +3,6 @@ work/
 data/
 results/
 .DS_Store
+tests/
+testing/
 *.pyc

@@ -41,6 +41,7 @@ def helpMessage() {
       --skip_ilastik [bool]           Skip Ilastik processing step
       --plugins [file]                Path to directory with plugin files required for CellProfiler. Default: assets/plugins
       --outdir [file]                 The output directory where the results will be saved
+      --publish_dir_mode [str]        Mode for publishing results in the output directory. Available: symlink, rellink, link, copy, copyNoFollow, move (Default: copy)
       --email [email]                 Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       --email_on_fail [email]         Same as --email, except only send mail if the workflow is not successful
       -name [str]                     Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -59,7 +60,7 @@ if (params.help) {
 }
 
 // Has the run name been specified by the user?
-//  this has the bonus effect of catching both -name and --name
+// this has the bonus effect of catching both -name and --name
 custom_runName = params.name
 if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
     custom_runName = workflow.runName
@@ -67,6 +68,7 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 
 // Stage config files
 ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 
 /*
  * Validate inputs
@@ -160,27 +162,27 @@ log.info "-\033[2m--------------------------------------------------\033[0m-"
 checkHostname()
 
 /*
- * STEP 1 - IMCTOOLS
+ * STEP 1: imctools
  */
-process IMCTools {
+process IMCTOOLS {
     tag "$name"
     label 'process_medium'
-    publishDir "${params.outdir}/imctools/${name}", mode: 'copy',
+    publishDir "${params.outdir}/imctools/${name}", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("version.txt") > 0) null
                       else filename
                 }
 
     input:
-    set val(name), file(mcd) from ch_mcd
-    file metadata from ch_metadata
+    tuple val(name), path(mcd) from ch_mcd
+    path metadata from ch_metadata
 
     output:
-    set val(name), file("*/full_stack/*") into ch_full_stack_tiff
-    set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
-    file "*/*ome.tiff"
-    file "*.csv"
-    file "*version.txt" into ch_imctools_version
+    tuple val(name), path("*/full_stack/*") into ch_full_stack_tiff
+    tuple val(name), path("*/ilastik_stack/*") into ch_ilastik_stack_tiff
+    path "*/*ome.tiff"
+    path "*.csv"
+    path "*version.txt" into ch_imctools_version
 
     script: // This script is bundled with the pipeline, in nf-core/imcyto/bin/
     """
@@ -223,26 +225,26 @@ ch_ilastik_stack_tiff
     .set { ch_ilastik_stack_tiff }
 
 /*
-* STEP 2 - PREPROCESS FULL STACK IMAGES WITH CELLPROFILER
-*/
-process PreprocessFullStack {
+ * STEP 2: Preprocess full stack images with CellProfiler
+ */
+process PREPROCESS_FULL_STACK {
     tag "${name}.${roi}"
     label 'process_medium'
-    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy',
+    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("version.txt") > 0) null
                       else filename
                 }
 
     input:
-    set val(name), val(roi), file(tiff) from ch_full_stack_tiff
-    file ctiff from ch_compensation_full_stack.collect().ifEmpty([])
-    file cppipe from ch_full_stack_cppipe
-    file plugin_dir from ch_preprocess_full_stack_plugin.collect()
+    tuple val(name), val(roi), path(tiff) from ch_full_stack_tiff
+    path ctiff from ch_compensation_full_stack.collect().ifEmpty([])
+    path cppipe from ch_full_stack_cppipe
+    path plugin_dir from ch_preprocess_full_stack_plugin.collect()
 
     output:
-    set val(name), val(roi), file("full_stack/*") into ch_preprocess_full_stack_tiff
-    file "*version.txt" into ch_cellprofiler_version
+    tuple val(name), val(roi), path("full_stack/*") into ch_preprocess_full_stack_tiff
+    path "*version.txt" into ch_cellprofiler_version
 
     script:
     """
@@ -261,21 +263,21 @@ process PreprocessFullStack {
 }
 
 /*
-* STEP 3 - PREPROCESS ILASTIK STACK IMAGES WITH CELLPROFILER
-*/
-process PreprocessIlastikStack {
+ * STEP 3: Preprocess Ilastik stack images with CellProfiler
+ */
+process PREPROCESS_ILASTIK_STACK {
     tag "${name}.${roi}"
     label 'process_medium'
-    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: 'copy'
+    publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: params.publish_dir_mode
 
     input:
-    set val(name), val(roi), file(tiff) from ch_ilastik_stack_tiff
-    file ctiff from ch_compensation_ilastik_stack.collect().ifEmpty([])
-    file cppipe from ch_ilastik_stack_cppipe
-    file plugin_dir from ch_preprocess_ilastik_stack_plugin.collect()
+    tuple val(name), val(roi), path(tiff) from ch_ilastik_stack_tiff
+    path ctiff from ch_compensation_ilastik_stack.collect().ifEmpty([])
+    path cppipe from ch_ilastik_stack_cppipe
+    path plugin_dir from ch_preprocess_ilastik_stack_plugin.collect()
 
     output:
-    set val(name), val(roi), file("ilastik_stack/*") into ch_preprocess_ilastik_stack_tiff
+    tuple val(name), val(roi), path("ilastik_stack/*") into ch_preprocess_ilastik_stack_tiff
 
     script:
     """
@@ -292,7 +294,7 @@ process PreprocessIlastikStack {
 }
 
 /*
- * STEP 4 - ILASTIK
+ * STEP 4: Ilastik
  */
 if (params.skip_ilastik) {
     ch_preprocess_full_stack_tiff
@@ -301,22 +303,22 @@ if (params.skip_ilastik) {
         .set { ch_preprocess_full_stack_tiff }
     ch_ilastik_version = Channel.empty()
 } else {
-    process Ilastik {
+    process ILASTIK {
         tag "${name}.${roi}"
         label 'process_medium'
-        publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: 'copy',
+        publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.indexOf("version.txt") > 0) null
                           else filename
                     }
 
         input:
-        set val(name), val(roi), file(tiff) from ch_preprocess_ilastik_stack_tiff
-        file ilastik_training_ilp from ch_ilastik_training_ilp
+        tuple val(name), val(roi), path(tiff) from ch_preprocess_ilastik_stack_tiff
+        path ilastik_training_ilp from ch_ilastik_training_ilp
 
         output:
-        set val(name), val(roi), file("*.tiff") into ch_ilastik_tiff
-        file "*version.txt" into ch_ilastik_version
+        tuple val(name), val(roi), path("*.tiff") into ch_ilastik_tiff
+        path "*version.txt" into ch_ilastik_version
 
         script:
         """
@@ -342,21 +344,20 @@ if (params.skip_ilastik) {
 }
 
 /*
- * STEP 5 - SEGMENTATION WITH CELLPROFILER
+ * STEP 5: Segmentation with CellProfiler
  */
-process Segmentation {
+process SEGMENTATION {
     tag "${name}.${roi}"
     label 'process_high'
-    publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: 'copy'
+    publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: params.publish_dir_mode
 
     input:
-    set val(name), val(roi), file(tiff) from ch_preprocess_full_stack_tiff
-    file cppipe from ch_segmentation_cppipe
-    file plugin_dir from ch_segmentation_plugin.collect()
+    tuple val(name), val(roi), path(tiff) from ch_preprocess_full_stack_tiff
+    path cppipe from ch_segmentation_cppipe
+    path plugin_dir from ch_segmentation_plugin.collect()
 
     output:
-    set val(name), val(roi), file("*.csv")
-    set val(name), val(roi), file("*.tiff")
+    path "*.{csv,tiff}"
 
     script:
     """
@@ -373,16 +374,17 @@ process Segmentation {
 }
 
 /*
- * STEP 6 - Output Description HTML
+ * STEP 6: Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
 
     input:
-    file output_docs from ch_output_docs
+    path output_docs from ch_output_docs
+    path images from ch_output_docs_images
 
     output:
-    file "results_description.html"
+    path "results_description.html"
 
     script:
     """
@@ -394,19 +396,19 @@ process output_documentation {
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf(".csv") > 0) filename
                       else null
                 }
 
     input:
-    file imctools from ch_imctools_version.first()
-    file cellprofiler from ch_cellprofiler_version.first()
-    file ilastik from ch_ilastik_version.first().ifEmpty([])
+    path imctools from ch_imctools_version.first()
+    path cellprofiler from ch_cellprofiler_version.first()
+    path ilastik from ch_ilastik_version.first().ifEmpty([])
 
     output:
-    file "software_versions.csv"
+    path "software_versions.csv"
 
     script:
     """
@@ -424,7 +426,7 @@ workflow.onComplete {
     // Set up the e-mail variables
     def subject = "[nf-core/imcyto] Successful: $workflow.runName"
     if (!workflow.success) {
-      subject = "[nf-core/imcyto] FAILED: $workflow.runName"
+        subject = "[nf-core/imcyto] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -445,10 +447,15 @@ workflow.onComplete {
     if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
     if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
     if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-    if (workflow.container) email_fields['summary']['Docker image'] = workflow.container
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
+
+    // Check if we are only sending emails on failure
+    email_address = params.email
+    if (!params.email && params.email_on_fail && !workflow.success) {
+        email_address = params.email_on_fail
+    }
 
     // Check if we are only sending emails on failure
     email_address = params.email
@@ -476,58 +483,58 @@ workflow.onComplete {
     // Send the HTML e-mail
     if (email_address) {
         try {
-          if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
-          // Try to send HTML e-mail using sendmail
-          [ 'sendmail', '-t' ].execute() << sendmail_html
-          log.info "[nf-core/imcyto] Sent summary e-mail to $email_address (sendmail)"
+            if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
+            // Try to send HTML e-mail using sendmail
+            [ 'sendmail', '-t' ].execute() << sendmail_html
+            log.info "[nf-core/imcyto] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
-          // Catch failures and try with plaintext
-          [ 'mail', '-s', subject, email_address ].execute() << email_txt
-          log.info "[nf-core/imcyto] Sent summary e-mail to $email_address (mail)"
+            // Catch failures and try with plaintext
+            [ 'mail', '-s', subject, email_address ].execute() << email_txt
+            log.info "[nf-core/imcyto] Sent summary e-mail to $email_address (mail)"
         }
     }
 
     // Write summary e-mail HTML to a file
     def output_d = new File("${params.outdir}/pipeline_info/")
     if (!output_d.exists()) {
-      output_d.mkdirs()
+        output_d.mkdirs()
     }
     def output_hf = new File(output_d, "pipeline_report.html")
     output_hf.withWriter { w -> w << email_html }
     def output_tf = new File(output_d, "pipeline_report.txt")
     output_tf.withWriter { w -> w << email_txt }
 
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
 
     if (workflow.stats.ignoredCount > 0 && workflow.success) {
-      log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
-      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}"
-      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}"
+        log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
+        log.info "-${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}-"
+        log.info "-${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}-"
     }
 
     if (workflow.success) {
-        log.info "${c_purple}[nf-core/imcyto]${c_green} Pipeline completed successfully${c_reset}"
+        log.info "-${c_purple}[nf-core/imcyto]${c_green} Pipeline completed successfully${c_reset}-"
     } else {
         checkHostname()
-        log.info "${c_purple}[nf-core/imcyto]${c_red} Pipeline completed with errors${c_reset}"
+        log.info "-${c_purple}[nf-core/imcyto]${c_red} Pipeline completed with errors${c_reset}-"
     }
 
 }
 
 def nfcoreHeader() {
     // Log colors ANSI codes
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
     c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
     c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
     c_white = params.monochrome_logs ? '' : "\033[0;37m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
 
     return """    -${c_dim}--------------------------------------------------${c_reset}-
                                             ${c_green},--.${c_black}/${c_green},-.${c_reset}

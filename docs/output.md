@@ -6,7 +6,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/). See main [`REA
 
 This is an automated image analysis pipeline that sequentially pre-processes and single cell segments imaging data to extract single cell expression data. This pipeline was generated for Imaging Mass Cytometry experiments, however, it is flexible enough to be applicable to other types of imaging data (e.g. immunofluorescence/immunohistochemistry data).
 
-The input to the pipeline can be in either `mcd`, `ome.tiff` or `txt` file format from which stacks of `tiff` files are generated for subsequent analysis. The various stages of this pipeline allow the `tiff` images to be pre-processed, and segmented using multiple CellProfiler `cppipe` project files and the pixel-classification software Ilastik. The concept of this step-wise image segmentation by combining Ilastik with CellProfiler was based on the analysis pipeline as described by the Bodenmiller group [(Zanotelli & Bodenmiller, Jan 2019)](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf).
+The input to the pipeline can be in either `mcd`, `tiff` or `txt` file format from which stacks of `tiff` files are generated for subsequent analysis. The various stages of this pipeline allow the `tiff` images to be pre-processed, and segmented using multiple CellProfiler `cppipe` project files and the pixel-classification software Ilastik. The concept of this step-wise image segmentation by combining Ilastik with CellProfiler was based on the analysis pipeline as described by the Bodenmiller group [(Zanotelli & Bodenmiller, Jan 2019)](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf).
 
 The project files supplied with the pipeline constitute the minimal requirements to generate a single cell mask. A more refined and comprehensive pipeline will be uploaded in due course.
 
@@ -18,7 +18,7 @@ This pipeline is designed to run on most compute infrastructures without the nee
 
 ## File prerequisites
 
-1. `mcd`, `ome.tiff` or `txt` data file(s) without any spaces in the file names. Associated antibody panel should contain metal and antibody information in the form of "metal_antibody" e.g. "89Y_CD45".
+1. `mcd`, `tiff` or `txt` data file(s) without any spaces in the file names. Associated antibody panel should contain metal and antibody information in the form of "metal_antibody" e.g. "89Y_CD45".
 
 2. `metadata.csv` file containing your antibody panel to identify which `tiff` files are to be used for the full and Ilastik stacks. See [`--metadata.csv`](usage.md#--metadata) for the required file format.
 
@@ -55,8 +55,6 @@ Once you have created/obtained the files required to run the pipeline, the direc
     └── segmentation.cppipe
 ```
 
-<!-- TODO nf-core: Also what happens when you run a mix of file types in the same folder? In this case remember to include ROI number in the txt/tiff file name (as mcd creates multiple ROI folders and it could get confusing if you are running similarly titled mcd's and txt/tiff in same/seperate runs). -->
-
 Providing you have installed the version of Nextflow required by the pipeline, and you either have Docker or Singularity installed and available on the `PATH`, you can then execute the pipeline on your compute infrastructure using the command below:
 
 ```bash
@@ -81,7 +79,7 @@ Each step of the pipeline as depicted in the pipeline schematic is broken down a
 
 *Input files*:  
 
-* `mcd`, `ome.tiff` or `txt` file
+* `mcd`, `tiff` or `txt` file
 * `metadata.csv` file
 
 *Output files*:

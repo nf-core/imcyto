@@ -1,19 +1,17 @@
-# ![nfcore/imcyto](docs/images/nf-core-imcyto_logo.png)
+# ![nf-core/imcyto](docs/images/nf-core-imcyto_logo.png)
 
-[![Build Status](https://travis-ci.com/nf-core/imcyto.svg?branch=master)](https://travis-ci.com/nf-core/imcyto)
 [![GitHub Actions CI Status](https://github.com/nf-core/imcyto/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/imcyto/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/imcyto/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/imcyto/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
+<!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3697959.svg)](https://doi.org/10.5281/zenodo.3697959)  -->
 
 ## Introduction
 
-**nfcore/imcyto** is a bioinformatics analysis pipeline used for image segmentation and extraction of single cell expression data. This pipeline was generated for Imaging Mass Cytometry data, however, it is flexible enough to be applicable to other types of imaging data (e.g. immunofluorescence/immunohistochemistry data).
+**nfcore/imcyto** is a bioinformatics analysis pipeline used for image segmentation and extraction of single cell expression data. This pipeline was generated for Imaging Mass Cytometry data, however, it is flexible enough to be applicable to other types of imaging data e.g. immunofluorescence/immunohistochemistry data.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
 ## Pipeline summary
-
-<!-- TODO nf-core: I think the schematic should also be added here as it nicely illustrates what this pipeline is for. -->
 
 1. Split image acquisition output files (`mcd`, `ome.tiff` or `txt`) by ROI and convert to individual `tiff` files for channels with names matching those defined in user-provided `metadata.csv` file. Full and ilastik stacks will be generated separately for all channels being analysed in single cell expression analysis, and for channels being used to generate the cell mask, respectively ([imctools](https://github.com/BodenmillerGroup/imctools)).
 
@@ -37,11 +35,9 @@ iii. Download the pipeline and test it on a minimal dataset with a single comman
 nextflow run nf-core/imcyto -profile test,<docker/singularity/institute>
 ```
 
-> Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile institute` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
+> Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
 
 iv. Start running your own analysis!
-
-<!-- TODO nf-core: Update the default command above used to run the pipeline -->
 
 ```bash
 nextflow run nf-core/imcyto \
@@ -90,7 +86,13 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi. -->
 <!-- If you use  nf-core/imcyto for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
-You can cite the `nf-core` pre-print as follows:  
-> Ewels PA, Peltzer A, Fillinger S, Alneberg JA, Patel H, Wilm A, Garcia MU, Di Tommaso P, Nahnsen S. **nf-core: Community curated bioinformatics pipelines**. *bioRxiv*. 2019. p. 610741. [doi: 10.1101/610741](https://www.biorxiv.org/content/10.1101/610741v1).
+You can cite the `nf-core` publication as follows:
+
+> **The nf-core framework for community-curated bioinformatics pipelines.**
+>
+> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
+>
+> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).  
+> ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.

@@ -5,28 +5,46 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['19.10.0', '']
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Install Nextflow
         run: |
-          export NXF_VER=${{ matrix.nxf_ver }}
-          export NXF_ANSI_LOG=false
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      #- name: Pull image (Cant pull standard single image for this pipeline as we are using individual BioContainers)
+      #- name: Pull docker image (Cant pull standard single image for this pipeline as we are using individual containers)
       #  run: |
-      #    docker pull nfcore/imcyto:dev && docker tag nfcore/imcyto:dev nfcore/imcyto:dev
+      #    docker pull nfcore/imcyto:dev
+      #    docker tag nfcore/imcyto:dev nfcore/imcyto:1.0.0
       - name: Run the pipeline with .mcd input
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
-      - name: Run the pipeline with .txt input
+
+  config:
+    env:
+      NXF_VER: '19.10.0'
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config: [test_txt, test_tiff, test_skip_ilastik]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Nextflow
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_txt,docker
-      - name: Run the pipeline with .tiff input
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      #- name: Pull docker image (Cant pull standard single image for this pipeline as we are using individual containers)
+      #  run: |
+      #    docker pull nfcore/imcyto:dev
+      #    docker tag nfcore/imcyto:dev nfcore/imcyto:1.0.0
+      - name: Run pipeline with various test configs
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tiff,docker
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.config }},docker
