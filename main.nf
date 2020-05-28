@@ -164,7 +164,7 @@ checkHostname()
 /*
  * STEP 1: imctools
  */
-process IMCTools {
+process IMCTOOLS {
     tag "$name"
     label 'process_medium'
     publishDir "${params.outdir}/imctools/${name}", mode: params.publish_dir_mode,
@@ -174,15 +174,15 @@ process IMCTools {
                 }
 
     input:
-    set val(name), file(mcd) from ch_mcd
-    file metadata from ch_metadata
+    tuple val(name), path(mcd) from ch_mcd
+    path metadata from ch_metadata
 
     output:
-    set val(name), file("*/full_stack/*") into ch_full_stack_tiff
-    set val(name), file("*/ilastik_stack/*") into ch_ilastik_stack_tiff
-    file "*/*ome.tiff"
-    file "*.csv"
-    file "*version.txt" into ch_imctools_version
+    tuple val(name), path("*/full_stack/*") into ch_full_stack_tiff
+    tuple val(name), path("*/ilastik_stack/*") into ch_ilastik_stack_tiff
+    path "*/*ome.tiff"
+    path "*.csv"
+    path "*version.txt" into ch_imctools_version
 
     script: // This script is bundled with the pipeline, in nf-core/imcyto/bin/
     """
@@ -227,7 +227,7 @@ ch_ilastik_stack_tiff
 /*
 * STEP 2: Preprocess full stack images with CellProfiler
 */
-process PreprocessFullStack {
+process PREPROCESS_FULL_STACK {
     tag "${name}.${roi}"
     label 'process_medium'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: params.publish_dir_mode,
@@ -237,14 +237,14 @@ process PreprocessFullStack {
                 }
 
     input:
-    set val(name), val(roi), file(tiff) from ch_full_stack_tiff
-    file ctiff from ch_compensation_full_stack.collect().ifEmpty([])
-    file cppipe from ch_full_stack_cppipe
-    file plugin_dir from ch_preprocess_full_stack_plugin.collect()
+    tuple val(name), val(roi), path(tiff) from ch_full_stack_tiff
+    path ctiff from ch_compensation_full_stack.collect().ifEmpty([])
+    path cppipe from ch_full_stack_cppipe
+    path plugin_dir from ch_preprocess_full_stack_plugin.collect()
 
     output:
-    set val(name), val(roi), file("full_stack/*") into ch_preprocess_full_stack_tiff
-    file "*version.txt" into ch_cellprofiler_version
+    tuple val(name), val(roi), path("full_stack/*") into ch_preprocess_full_stack_tiff
+    path "*version.txt" into ch_cellprofiler_version
 
     script:
     """
@@ -265,19 +265,19 @@ process PreprocessFullStack {
 /*
 * STEP 3: Preprocess Ilastik stack images with CellProfiler
 */
-process PreprocessIlastikStack {
+process PREPROCESS_ILASTIK_STACK {
     tag "${name}.${roi}"
     label 'process_medium'
     publishDir "${params.outdir}/preprocess/${name}/${roi}", mode: params.publish_dir_mode
 
     input:
-    set val(name), val(roi), file(tiff) from ch_ilastik_stack_tiff
-    file ctiff from ch_compensation_ilastik_stack.collect().ifEmpty([])
-    file cppipe from ch_ilastik_stack_cppipe
-    file plugin_dir from ch_preprocess_ilastik_stack_plugin.collect()
+    tuple val(name), val(roi), path(tiff) from ch_ilastik_stack_tiff
+    path ctiff from ch_compensation_ilastik_stack.collect().ifEmpty([])
+    path cppipe from ch_ilastik_stack_cppipe
+    path plugin_dir from ch_preprocess_ilastik_stack_plugin.collect()
 
     output:
-    set val(name), val(roi), file("ilastik_stack/*") into ch_preprocess_ilastik_stack_tiff
+    tuple val(name), val(roi), path("ilastik_stack/*") into ch_preprocess_ilastik_stack_tiff
 
     script:
     """
@@ -303,7 +303,7 @@ if (params.skip_ilastik) {
         .set { ch_preprocess_full_stack_tiff }
     ch_ilastik_version = Channel.empty()
 } else {
-    process Ilastik {
+    process ILASTIK {
         tag "${name}.${roi}"
         label 'process_medium'
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: params.publish_dir_mode,
@@ -313,12 +313,12 @@ if (params.skip_ilastik) {
                     }
 
         input:
-        set val(name), val(roi), file(tiff) from ch_preprocess_ilastik_stack_tiff
-        file ilastik_training_ilp from ch_ilastik_training_ilp
+        tuple val(name), val(roi), path(tiff) from ch_preprocess_ilastik_stack_tiff
+        path ilastik_training_ilp from ch_ilastik_training_ilp
 
         output:
-        set val(name), val(roi), file("*.tiff") into ch_ilastik_tiff
-        file "*version.txt" into ch_ilastik_version
+        tuple val(name), val(roi), path("*.tiff") into ch_ilastik_tiff
+        path "*version.txt" into ch_ilastik_version
 
         script:
         """
@@ -346,19 +346,18 @@ if (params.skip_ilastik) {
 /*
  * STEP 5: Segmentation with CellProfiler
  */
-process Segmentation {
+process SEGMENTATION {
     tag "${name}.${roi}"
     label 'process_high'
     publishDir "${params.outdir}/segmentation/${name}/${roi}", mode: params.publish_dir_mode
 
     input:
-    set val(name), val(roi), file(tiff) from ch_preprocess_full_stack_tiff
-    file cppipe from ch_segmentation_cppipe
-    file plugin_dir from ch_segmentation_plugin.collect()
+    tuple val(name), val(roi), path(tiff) from ch_preprocess_full_stack_tiff
+    path cppipe from ch_segmentation_cppipe
+    path plugin_dir from ch_segmentation_plugin.collect()
 
     output:
-    set val(name), val(roi), file("*.csv")
-    set val(name), val(roi), file("*.tiff")
+    path "*.{csv,tiff}"
 
     script:
     """
@@ -381,11 +380,11 @@ process output_documentation {
     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
 
     input:
-    file output_docs from ch_output_docs
-    file images from ch_output_docs_images
+    path output_docs from ch_output_docs
+    path images from ch_output_docs_images
 
     output:
-    file "results_description.html"
+    path "results_description.html"
 
     script:
     """
@@ -404,12 +403,12 @@ process get_software_versions {
                 }
 
     input:
-    file imctools from ch_imctools_version.first()
-    file cellprofiler from ch_cellprofiler_version.first()
-    file ilastik from ch_ilastik_version.first().ifEmpty([])
+    path imctools from ch_imctools_version.first()
+    path cellprofiler from ch_cellprofiler_version.first()
+    path ilastik from ch_ilastik_version.first().ifEmpty([])
 
     output:
-    file "software_versions.csv"
+    path "software_versions.csv"
 
     script:
     """
