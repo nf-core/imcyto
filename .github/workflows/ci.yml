@@ -22,7 +22,7 @@ jobs:
       #- name: Pull docker image (Cant pull standard single image for this pipeline as we are using individual containers)
       #  run: |
       #    docker pull nfcore/imcyto:dev
-      #    docker tag nfcore/imcyto:dev nfcore/imcyto:1.0.0
+      #    docker tag nfcore/imcyto:dev nfcore/imcyto:dev
       - name: Run the pipeline with .mcd input
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
@@ -44,7 +44,7 @@ jobs:
       #- name: Pull docker image (Cant pull standard single image for this pipeline as we are using individual containers)
       #  run: |
       #    docker pull nfcore/imcyto:dev
-      #    docker tag nfcore/imcyto:dev nfcore/imcyto:1.0.0
+      #    docker tag nfcore/imcyto:dev nfcore/imcyto:dev
       - name: Run pipeline with various test configs
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.config }},docker
