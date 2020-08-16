@@ -1,5 +1,6 @@
 # nf-core/imcyto: Usage
 
+<<<<<<< HEAD
 ## Table of contents
 
 * [Table of contents](#table-of-contents)
@@ -50,12 +51,18 @@ It is recommended to limit the Nextflow Java virtual machines memory. We recomme
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
+=======
+## Introduction
+
+<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+>>>>>>> TEMPLATE
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
+<<<<<<< HEAD
 nextflow run nf-core/imcyto \
     --input "./inputs/*.mcd" \
     --metadata './inputs/metadata.csv' \
@@ -65,6 +72,9 @@ nextflow run nf-core/imcyto \
     --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
     --plugins './plugins/cp_plugins/' \
     -profile <docker/singularity>
+=======
+nextflow run nf-core/imcyto --input '*_R{1,2}.fastq.gz' -profile docker
+>>>>>>> TEMPLATE
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -94,7 +104,9 @@ First, go to the [nf-core/imcyto releases page](https://github.com/nf-core/imcyt
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
-## Main arguments
+## Core Nextflow arguments
+
+> **NB:** These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
 
 ### `-profile`
 
@@ -110,15 +122,25 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
 
 * `docker`
-  * A generic configuration profile to be used with [Docker](http://docker.com/)
-  * Pulls software from dockerhub: [`nfcore/imcyto`](http://hub.docker.com/r/nfcore/imcyto/)
+  * A generic configuration profile to be used with [Docker](https://docker.com/)
+  * Pulls software from Docker Hub: [`nfcore/imcyto`](https://hub.docker.com/r/nfcore/imcyto/)
 * `singularity`
+<<<<<<< HEAD
   * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
   * Pulls software from DockerHub: [`nfcore/imcyto`](http://hub.docker.com/r/nfcore/imcyto/)
+=======
+  * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+  * Pulls software from Docker Hub: [`nfcore/imcyto`](https://hub.docker.com/r/nfcore/imcyto/)
+* `conda`
+  * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
+  * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
+  * Pulls most software from [Bioconda](https://bioconda.github.io/)
+>>>>>>> TEMPLATE
 * `test`
   * A profile with a complete configuration for automated testing
   * Includes links to test data so needs no other parameters
 
+<<<<<<< HEAD
 ### `--input`
 
 Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are `*.mcd`, `*.tiff` and `*.txt`.
@@ -198,29 +220,50 @@ Each step in the pipeline has a default set of requirements for number of CPUs, 
 ### Custom resource requests
 
 Wherever process-specific requirements are set in the pipeline, the default value can be changed by creating a custom config file. See the files hosted at [`nf-core/configs`](https://github.com/nf-core/configs/tree/master/conf) for examples.
+=======
+### `-resume`
+
+Specify this when restarting a pipeline. Nextflow will used cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously.
+
+You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
+
+### `-c`
+
+Specify the path to a specific config file (this is a core Nextflow command). See the [nf-core website documentation](https://nf-co.re/usage/configuration) for more information.
+
+#### Custom resource requests
+
+Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
+
+Whilst these default requirements will hopefully work for most people with most data, you may find that you want to customise the compute resources that the pipeline requests. You can do this by creating a custom config file. For example, to give the workflow process `star` 32GB of memory, you could use the following config:
+
+```nextflow
+process {
+  withName: star {
+    memory = 32.GB
+  }
+}
+```
+
+See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information.
+>>>>>>> TEMPLATE
 
 If you are likely to be running `nf-core` pipelines regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter (see definition below). You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
 
-If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack).
+If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
 
-## AWS Batch specific parameters
+### Running in the background
 
-Running the pipeline on AWS Batch requires a couple of specific parameters to be set according to your AWS Batch configuration. Please use [`-profile awsbatch`](https://github.com/nf-core/configs/blob/master/conf/awsbatch.config) and then specify all of the following parameters.
+Nextflow handles job submissions and supervises the running jobs. The Nextflow process must run until the pipeline is finished.
 
-### `--awsqueue`
+The Nextflow `-bg` flag launches Nextflow in the background, detached from your terminal so that the workflow does not stop if you log out of your session. The logs are saved to a file.
 
-The JobQueue that you intend to use on AWS Batch.
+Alternatively, you can use `screen` / `tmux` or similar tool to create a detached session which you can log back into at a later time.
+Some HPC setups also allow you to run nextflow within a cluster job submitted your job scheduler (from where it submits more jobs).
 
-### `--awsregion`
+#### Nextflow memory requirements
 
-The AWS region in which to run your job. Default is set to `eu-west-1` but can be adjusted to your needs.
-
-### `--awscli`
-
-The [AWS CLI](https://www.nextflow.io/docs/latest/awscloud.html#aws-cli-installation) path in your custom AMI. Default: `/home/ec2-user/miniconda/bin/aws`.
-
-Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
-
+<<<<<<< HEAD
 ## Other command line parameters
 
 ### `--outdir`
@@ -278,17 +321,15 @@ If you're running offline, nextflow will not be able to fetch the institutional 
 from the internet. If you don't need them, then this is not a problem. If you do need them,
 you should download the files from the repo and tell nextflow where to find them with the
 `custom_config_base` option. For example:
+=======
+In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
+We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
+>>>>>>> TEMPLATE
 
 ```bash
-## Download and unzip the config files
-cd /path/to/my/configs
-wget https://github.com/nf-core/configs/archive/master.zip
-unzip master.zip
-
-## Run the pipeline
-cd /path/to/my/data
-nextflow run /path/to/pipeline/ --custom_config_base /path/to/my/configs/configs-master/
+NXF_OPTS='-Xms1g -Xmx4g'
 ```
+<<<<<<< HEAD
 
 > Note that the nf-core/tools helper package has a `download` command to download all required pipeline
 > files + singularity containers + institutional configs in one go for you, to make this process easier.
@@ -315,3 +356,5 @@ Set to receive plain-text e-mails instead of HTML formatted.
 ### `--monochrome_logs`
 
 Set to disable colourful command line output and live life in monochrome.
+=======
+>>>>>>> TEMPLATE
