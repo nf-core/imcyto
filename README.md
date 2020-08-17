@@ -3,14 +3,8 @@
 [![GitHub Actions CI Status](https://github.com/nf-core/imcyto/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/imcyto/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/imcyto/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/imcyto/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
-<<<<<<< HEAD
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3865430.svg)](https://doi.org/10.5281/zenodo.3865430)
-=======
-
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
-[![Docker](https://img.shields.io/docker/automated/nfcore/imcyto.svg)](https://hub.docker.com/r/nfcore/imcyto)
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23imcyto-4A154B?logo=slack)](https://nfcore.slack.com/channels/imcyto)
->>>>>>> TEMPLATE
 
 ## Introduction
 
@@ -34,29 +28,18 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 1. Install [`nextflow`](https://nf-co.re/usage/installation)
 
-<<<<<<< HEAD
-ii. Install one of [`docker`](https://docs.docker.com/engine/installation/) or [`singularity`](https://www.sylabs.io/guides/3.0/user-guide/)
-=======
-2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
->>>>>>> TEMPLATE
+2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility
 
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
-<<<<<<< HEAD
-```bash
-nextflow run nf-core/imcyto -profile test,<docker/singularity/institute>
-```
-=======
     ```bash
-    nextflow run nf-core/imcyto -profile test,<docker/singularity/conda/institute>
+    nextflow run nf-core/imcyto -profile test,<docker/singularity/institute>
     ```
->>>>>>> TEMPLATE
 
     > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
 
 4. Start running your own analysis!
 
-<<<<<<< HEAD
 ```bash
 nextflow run nf-core/imcyto \
     --input "./inputs/*.mcd" \
@@ -68,31 +51,12 @@ nextflow run nf-core/imcyto \
     --plugins './plugins/cp_plugins/' \
     -profile <docker/singularity/institute>
 ```
-=======
-    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
-
-    ```bash
-    nextflow run nf-core/imcyto -profile <docker/singularity/conda/institute> --input '*_R{1,2}.fastq.gz' --genome GRCh37
-    ```
->>>>>>> TEMPLATE
 
 See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
 
 ## Documentation
 
-<<<<<<< HEAD
-The nf-core/imcyto pipeline comes with documentation about the pipeline, found in the `docs/` directory:
-
-1. [Installation](https://nf-co.re/usage/installation)
-2. Pipeline configuration
-    * [Local installation](https://nf-co.re/usage/local_installation)
-    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-3. [Running the pipeline](docs/usage.md)
-4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-=======
 The nf-core/imcyto pipeline comes with documentation about the pipeline which you can read at [https://nf-core/imcyto/docs](https://nf-core/imcyto/docs) or find in the [`docs/` directory](docs).
->>>>>>> TEMPLATE
 
 ## Credits
 

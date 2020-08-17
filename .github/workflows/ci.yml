@@ -22,38 +22,26 @@ jobs:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['19.10.0', '']
     steps:
-<<<<<<< HEAD
-      - uses: actions/checkout@v2
-      - name: Install Nextflow
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
-      #- name: Pull docker image (Cant pull standard single image for this pipeline as we are using individual containers)
-      #  run: |
-      #    docker pull nfcore/imcyto:dev
-      #    docker tag nfcore/imcyto:dev nfcore/imcyto:dev
-      - name: Run the pipeline with .mcd input
-        run: |
-=======
       - name: Check out pipeline code
         uses: actions/checkout@v2
 
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v1
-        with:
-          PREFIX_FILTER: |
-            Dockerfile
-            environment.yml
-
-      - name: Build new docker image
-        if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/imcyto:dev
-
-      - name: Pull docker image
-        if: ${{ !env.GIT_DIFF }}
-        run: |
-          docker pull nfcore/imcyto:dev
-          docker tag nfcore/imcyto:dev nfcore/imcyto:dev
+      # WE ARE USING OTHER PUBLICLY AVAILABLE CONTAINERS FOR THIS PIPELINE
+      # - name: Check if Dockerfile or Conda environment changed
+      #   uses: technote-space/get-diff-action@v1
+      #   with:
+      #     PREFIX_FILTER: |
+      #       Dockerfile
+      #       environment.yml
+      #
+      # - name: Build new docker image
+      #   if: env.GIT_DIFF
+      #   run: docker build --no-cache . -t nfcore/imcyto:dev
+      #
+      # - name: Pull docker image
+      #   if: ${{ !env.GIT_DIFF }}
+      #   run: |
+      #     docker pull nfcore/imcyto:dev
+      #     docker tag nfcore/imcyto:dev nfcore/imcyto:dev
 
       - name: Install Nextflow
         run: |
@@ -61,31 +49,29 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with test data
-        # TODO nf-core: You can customise CI pipeline run tests as required
-        # For example: adding multiple test runs with different parameters
-        # Remember that you can parallelise this by using strategy.matrix
         run: |
->>>>>>> TEMPLATE
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
 
-  config:
+
+  profile:
+    name: Run profile tests
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/imcyto') }}
+    runs-on: ubuntu-latest
     env:
       NXF_VER: '19.10.0'
       NXF_ANSI_LOG: false
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        config: [test_txt, test_tiff, test_skip_ilastik]
+        profiles: [test_txt, test_tiff, test_skip_ilastik]
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out pipeline code
+        uses: actions/checkout@v2
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      #- name: Pull docker image (Cant pull standard single image for this pipeline as we are using individual containers)
-      #  run: |
-      #    docker pull nfcore/imcyto:dev
-      #    docker tag nfcore/imcyto:dev nfcore/imcyto:dev
-      - name: Run pipeline with various test configs
+
+      - name: Run pipeline with different profiles
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.config }},docker
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.profiles }},docker
