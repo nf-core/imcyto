@@ -11,20 +11,54 @@
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
             "required": [
-                "input"
+                "input",
+                "metadata",
+                "full_stack_cppipe",
+                "ilastik_stack_cppipe",
+                "segmentation_cppipe"
             ],
             "properties": {
                 "input": {
                     "type": "string",
                     "fa_icon": "fas fa-dna",
-                    "description": "Input FastQ files.",
-                    "help_text": "Use this to specify the location of your input FastQ files. For example:\n\n```bash\n--input 'path/to/data/sample_*_{1,2}.fastq'\n```\n\nPlease note the following requirements:\n\n1. The path must be enclosed in quotes\n2. The path must have at least one `*` wildcard character\n3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.\n\nIf left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`"
+                    "help_text": "Use this to specify the location of your input files. For example:\n\n```bash\n--input 'path/to/data/*.mcd'\n```\n\nPlease note the following requirements:\n\n1. The path must be enclosed in quotes\n2. The path must have at least one `*` wildcard character\n\nIf left unspecified, a default pattern is used: `data/*.mcd`",
+                    "description": "Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd, *.ome.tiff, *.txt.",
+                    "default": "data/*.mcd"
                 },
-                "single_end": {
+                "metadata": {
+                    "type": "string",
+                    "default": "./metadata.csv",
+                    "description": "Path to metadata csv file indicating which images to merge in full stack and/or Ilastik stack.",
+                    "help_text": "The file should only contain 3 columns i.e. 'metal', 'full_stack' and 'ilastik_stack'. The `metal` column should contain all the metals used in your antibody panel. The `full_stack` and `ilastik_stack` entries should be `1` or `0` to indicate whether to include or exclude a metal for a given stack, respectively. See [`metadata.csv`](https://github.com/nf-core/test-datasets/blob/imcyto/inputs/metadata.csv) for an example."
+                },
+                "full_stack_cppipe": {
+                    "type": "string",
+                    "description": "CellProfiler pipeline file required to create full stack (cppipe format)."
+                },
+                "ilastik_stack_cppipe": {
+                    "type": "string",
+                    "description": "CellProfiler pipeline file required to create Ilastik stack (cppipe format)."
+                },
+                "segmentation_cppipe": {
+                    "type": "string",
+                    "description": "CellProfiler pipeline file required for segmentation (cppipe format)."
+                },
+                "ilastik_training_ilp": {
+                    "type": "string",
+                    "description": "Parameter file required by Ilastik (ilp format)."
+                },
+                "compensation_tiff": {
+                    "type": "string",
+                    "description": "Tiff file for compensation analysis during CellProfiler preprocessing steps."
+                },
+                "skip_ilastik": {
                     "type": "boolean",
-                    "description": "Specifies that the input is single-end reads.",
-                    "fa_icon": "fas fa-align-center",
-                    "help_text": "By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--input`. For example:\n\n```bash\n--single_end --input '*.fastq'\n```\n\nIt is not possible to run a mixture of single-end and paired-end files in one run."
+                    "description": "Tiff file for compensation analysis during CellProfiler preprocessing steps."
+                },
+                "plugins": {
+                    "type": "string",
+                    "default": "\"$baseDir/assets/plugins/\"",
+                    "description": "Path to directory with plugin files required for CellProfiler."
                 },
                 "outdir": {
                     "type": "string",
@@ -38,40 +72,6 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
-                }
-            }
-        },
-        "reference_genome_options": {
-            "title": "Reference genome options",
-            "type": "object",
-            "fa_icon": "fas fa-dna",
-            "description": "Options for the reference genome indices used to align reads.",
-            "properties": {
-                "genome": {
-                    "type": "string",
-                    "description": "Name of iGenomes reference.",
-                    "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`.\n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
-                },
-                "fasta": {
-                    "type": "string",
-                    "fa_icon": "fas fa-font",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "If you have no genome reference available, the pipeline can build one using a FASTA file. This requires additional time and resources, so it's better to use a pre-build index if possible."
-                },
-                "igenomes_base": {
-                    "type": "string",
-                    "description": "Directory / URL base for iGenomes references.",
-                    "default": "s3://ngi-igenomes/igenomes/",
-                    "fa_icon": "fas fa-cloud-download-alt",
-                    "hidden": true
-                },
-                "igenomes_ignore": {
-                    "type": "boolean",
-                    "description": "Do not load the iGenomes reference config.",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
                 }
             }
         },
@@ -126,14 +126,6 @@
                     "hidden": true,
                     "help_text": "Set to receive plain-text e-mails instead of HTML formatted."
                 },
-                "max_multiqc_email_size": {
-                    "type": "string",
-                    "description": "File size limit when attaching MultiQC reports to summary emails.",
-                    "default": "25.MB",
-                    "fa_icon": "fas fa-file-upload",
-                    "hidden": true,
-                    "help_text": "If file generated by pipeline exceeds the threshold, it will not be attached."
-                },
                 "monochrome_logs": {
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
@@ -141,18 +133,18 @@
                     "hidden": true,
                     "help_text": "Set to disable colourful command line output and live life in monochrome."
                 },
-                "multiqc_config": {
-                    "type": "string",
-                    "description": "Custom config file to supply to MultiQC.",
-                    "fa_icon": "fas fa-cog",
-                    "hidden": true
-                },
                 "tracedir": {
                     "type": "string",
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
                     "default": "${params.outdir}/pipeline_info",
                     "fa_icon": "fas fa-cogs",
                     "hidden": true
+                },
+                "clusterOptions": {
+                    "type": "string",
+                    "description": "Arguments passed to Nextflow clusterOptions.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-network-wired"
                 }
             }
         },
@@ -242,9 +234,6 @@
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
-        },
-        {
-            "$ref": "#/definitions/reference_genome_options"
         },
         {
             "$ref": "#/definitions/generic_options"
