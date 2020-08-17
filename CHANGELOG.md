@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unpublished Version / DEV]
 
+### `Added`
+
+* Update template to tools `1.10.2`
+
 ## [1.0.0] - 2020-05-29
 
 Initial release of nf-core/imcyto, created with the [nf-core](https://nf-co.re/) template.
