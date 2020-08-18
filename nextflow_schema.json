@@ -20,7 +20,7 @@
             "properties": {
                 "input": {
                     "type": "string",
-                    "fa_icon": "fas fa-dna",
+                    "fa_icon": "fas fa-images",
                     "help_text": "Use this to specify the location of your input files. For example:\n\n```bash\n--input 'path/to/data/*.mcd'\n```\n\nPlease note the following requirements:\n\n1. The path must be enclosed in quotes\n2. The path must have at least one `*` wildcard character\n\nIf left unspecified, a default pattern is used: `data/*.mcd`",
                     "description": "Path to input data file(s) (globs must be surrounded with quotes). Currently supported formats are *.mcd, *.ome.tiff, *.txt.",
                     "default": "data/*.mcd"
@@ -29,36 +29,44 @@
                     "type": "string",
                     "default": "./metadata.csv",
                     "description": "Path to metadata csv file indicating which images to merge in full stack and/or Ilastik stack.",
-                    "help_text": "The file should only contain 3 columns i.e. 'metal', 'full_stack' and 'ilastik_stack'. The `metal` column should contain all the metals used in your antibody panel. The `full_stack` and `ilastik_stack` entries should be `1` or `0` to indicate whether to include or exclude a metal for a given stack, respectively. See [`metadata.csv`](https://github.com/nf-core/test-datasets/blob/imcyto/inputs/metadata.csv) for an example."
+                    "help_text": "The file should only contain 3 columns i.e. 'metal', 'full_stack' and 'ilastik_stack'. The `metal` column should contain all the metals used in your antibody panel. The `full_stack` and `ilastik_stack` entries should be `1` or `0` to indicate whether to include or exclude a metal for a given stack, respectively. See [`metadata.csv`](https://github.com/nf-core/test-datasets/blob/imcyto/inputs/metadata.csv) for an example.",
+                    "fa_icon": "fas fa-file-csv"
                 },
                 "full_stack_cppipe": {
                     "type": "string",
-                    "description": "CellProfiler pipeline file required to create full stack (cppipe format)."
+                    "description": "CellProfiler pipeline file required to create full stack (cppipe format).",
+                    "fa_icon": "fas fa-edit"
                 },
                 "ilastik_stack_cppipe": {
                     "type": "string",
-                    "description": "CellProfiler pipeline file required to create Ilastik stack (cppipe format)."
+                    "description": "CellProfiler pipeline file required to create Ilastik stack (cppipe format).",
+                    "fa_icon": "fas fa-edit"
                 },
                 "segmentation_cppipe": {
                     "type": "string",
-                    "description": "CellProfiler pipeline file required for segmentation (cppipe format)."
+                    "description": "CellProfiler pipeline file required for segmentation (cppipe format).",
+                    "fa_icon": "fas fa-edit"
                 },
                 "ilastik_training_ilp": {
                     "type": "string",
-                    "description": "Parameter file required by Ilastik (ilp format)."
+                    "description": "Parameter file required by Ilastik (ilp format).",
+                    "fa_icon": "fas fa-edit"
                 },
                 "compensation_tiff": {
                     "type": "string",
-                    "description": "Tiff file for compensation analysis during CellProfiler preprocessing steps."
-                },
-                "skip_ilastik": {
-                    "type": "boolean",
-                    "description": "Tiff file for compensation analysis during CellProfiler preprocessing steps."
+                    "description": "Tiff file for compensation analysis during CellProfiler preprocessing steps.",
+                    "fa_icon": "fas fa-edit"
                 },
                 "plugins": {
                     "type": "string",
-                    "default": "\"$baseDir/assets/plugins/\"",
-                    "description": "Path to directory with plugin files required for CellProfiler."
+                    "default": "$baseDir/assets/plugins",
+                    "description": "Path to directory with plugin files required for CellProfiler.",
+                    "fa_icon": "fas fa-plug"
+                },
+                "skip_ilastik": {
+                    "type": "boolean",
+                    "description": "Tiff file for compensation analysis during CellProfiler preprocessing steps.",
+                    "fa_icon": "fas fa-fast-forward"
                 },
                 "outdir": {
                     "type": "string",
@@ -101,7 +109,7 @@
                         "link",
                         "copy",
                         "copyNoFollow",
-                        "mov"
+                        "move"
                     ]
                 },
                 "name": {
