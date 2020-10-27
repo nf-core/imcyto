@@ -1,5 +1,9 @@
 # nf-core/imcyto: Usage
 
+## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/imcyto/usage](https://nf-co.re/imcyto/usage)
+
+> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
+
 ## Introduction
 
 ## Running the pipeline
@@ -53,7 +57,7 @@ This version number will be logged in reports when you run the pipeline, so that
 
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
 
-Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity) - see below.
+Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman) - see below.
 
 The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
 
@@ -67,6 +71,9 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   * Pulls software from Docker Hub: [`nfcore/imcyto`](https://hub.docker.com/r/nfcore/imcyto/)
 * `singularity`
   * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+  * Pulls software from Docker Hub: [`nfcore/imcyto`](https://hub.docker.com/r/nfcore/imcyto/)
+* `podman`
+  * A generic configuration profile to be used with [Podman](https://podman.io/)
   * Pulls software from Docker Hub: [`nfcore/imcyto`](https://hub.docker.com/r/nfcore/imcyto/)
 * `test`
   * A profile with a complete configuration for automated testing
@@ -98,7 +105,7 @@ process {
 
 See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information.
 
-If you are likely to be running `nf-core` pipelines regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter (see definition below). You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
+If you are likely to be running `nf-core` pipelines regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter (see definition above). You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
 
 If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
 

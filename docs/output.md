@@ -1,6 +1,12 @@
 # nf-core/imcyto: Output
 
+## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/imcyto/output](https://nf-co.re/imcyto/output)
+
+> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
+
 ## Pipeline overview
+
+This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/). See main [`README.md`](../README.md#pipeline-summary) for a condensed overview of the steps in the pipeline, and the bioinformatics tools used at each step.
 
