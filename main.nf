@@ -66,10 +66,6 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
     custom_runName = workflow.runName
 }
 
-// Stage config files
-ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
-ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
-
 /*
  * Validate inputs
  */
@@ -371,25 +367,6 @@ process SEGMENTATION {
         --output-directory ./ \\
         --log-level DEBUG \\
         --temporary-directory ./tmp
-    """
-}
-
-/*
- * STEP 6: Output Description HTML
- */
-process output_documentation {
-    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
-
-    input:
-    path output_docs from ch_output_docs
-    path images from ch_output_docs_images
-
-    output:
-    path "results_description.html"
-
-    script:
-    """
-    markdown_to_html.r $output_docs results_description.html
     """
 }
 
