@@ -59,7 +59,7 @@
                 },
                 "plugins": {
                     "type": "string",
-                    "default": "$baseDir/assets/plugins",
+                    "default": "$projectDir/assets/plugins",
                     "description": "Path to directory with plugin files required for CellProfiler.",
                     "fa_icon": "fas fa-plug"
                 },
