@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
-* Update pipeline template to nf-core/tools `1.12`
+* Update pipeline template to nf-core/tools `1.12.1`
 
 ## [1.0.0] - 2020-05-29
 
