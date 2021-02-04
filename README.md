@@ -83,7 +83,16 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 
 ## Citation
 
-If you use  nf-core/imcyto for your analysis, please cite it using the following doi: [10.5281/zenodo.3865430](https://doi.org/10.5281/zenodo.3865430)
+If you use nf-core/imcyto for your analysis, please cite it using the following preprint: 
+
+> **Characterisation of tumour immune microenvironment remodelling following oncogene inhibition in preclinical studies using an optimised imaging mass cytometry workflow**
+>
+> Febe van Maldegem, Karishma Valand, Megan Cole, Harshil Patel, Mihaela Angelova, Sareena Rana, Emma Colliver, Katey Enfield, Nourdine Bah, Victoria Tsang, Edurne Mugarza,
+> Christopher Moore, Philip Hobson, Dina Levi, Miriam Molina, Charles Swanton, Julian Downward
+>
+> bioRxiv 2021.02.02.429358; doi: [10.1101/2021.02.02.429358](https://doi.org/10.1101/2021.02.02.429358)
+
+The Zenodo doi for the pipeline itself is: [10.5281/zenodo.3865430](https://doi.org/10.5281/zenodo.3865430)
 
 You can cite the `nf-core` publication as follows:
 
