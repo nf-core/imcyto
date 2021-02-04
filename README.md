@@ -83,7 +83,7 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 
 ## Citation
 
-If you use nf-core/imcyto for your analysis, please cite it using the following preprint: 
+If you use nf-core/imcyto for your analysis, please cite it using the following preprint:
 
 > **Characterisation of tumour immune microenvironment remodelling following oncogene inhibition in preclinical studies using an optimised imaging mass cytometry workflow**
 >
