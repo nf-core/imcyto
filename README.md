@@ -85,12 +85,11 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 
 If you use nf-core/imcyto for your analysis, please cite it using the following preprint:
 
-> **Characterisation of tumour immune microenvironment remodelling following oncogene inhibition in preclinical studies using an optimised imaging mass cytometry workflow**
+> **Characterisation of tumour microenvironment remodelling following oncogene inhibition in preclinical studies with imaging mass cytometry.**
 >
-> Febe van Maldegem, Karishma Valand, Megan Cole, Harshil Patel, Mihaela Angelova, Sareena Rana, Emma Colliver, Katey Enfield, Nourdine Bah, Victoria Tsang, Edurne Mugarza,
-> Christopher Moore, Philip Hobson, Dina Levi, Miriam Molina, Charles Swanton, Julian Downward
->
-> bioRxiv 2021.02.02.429358; doi: [10.1101/2021.02.02.429358](https://doi.org/10.1101/2021.02.02.429358)
+> Febe van Maldegem, Karishma Valand, Megan Cole, Harshil Patel, Mihaela Angelova, Sareena Rana, Emma Colliver, Katey Enfield, Nourdine Bah, Gavin Kelly, Victoria Siu Kwan Tsang, Edurne Mugarza, Christopher Moore, Philip Hobson, Dina Levi, Miriam Molina, Charles Swanton & Julian Downward.
+> 
+> Nat Commun. 2021 Oct 8;12(1):5906. doi: [10.1038/s41467-021-26214-x](https://doi.org/10.1038/s41467-021-26214-x)
 
 The Zenodo doi for the pipeline itself is: [10.5281/zenodo.3865430](https://doi.org/10.5281/zenodo.3865430)
 
