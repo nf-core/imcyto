@@ -13,8 +13,8 @@ if (params.skip_ilastik) {
         label 'process_medium'
         publishDir "${params.outdir}/ilastik/${name}/${roi}", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.indexOf("version.txt") > 0) null
-                          else filename
+                        if (filename.indexOf("version.txt") > 0) null
+                        else filename
                     }
 
         input:

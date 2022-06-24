@@ -6,9 +6,9 @@ process IMCTOOLS {
     label 'process_medium'
     publishDir "${params.outdir}/imctools/${name}", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      if (filename.indexOf("version.txt") > 0) null
-                      else filename
-                }
+            if (filename.indexOf("version.txt") > 0) null
+            else filename
+        }
 
     input:
     tuple val(name), path(mcd) from ch_mcd
