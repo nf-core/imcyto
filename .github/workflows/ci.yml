@@ -54,9 +54,9 @@ jobs:
     strategy:
       matrix:
         profiles:
-        - "test_txt"
-        - "test_tiff"
-        - "test_skip_ilastik"
+          - "test_txt"
+          - "test_tiff"
+          - "test_skip_ilastik"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
