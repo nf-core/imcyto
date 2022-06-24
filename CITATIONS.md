@@ -10,10 +10,20 @@
 
 ## Pipeline tools
 
-- [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- [CellProfiler](https://www.ncbi.nlm.nih.gov/pubmed/29969450/)
+  > McQuin C, Goodman A, Chernyshev V, Kamentsky L, Cimini BA, Karhohs KW, Doan M, Ding L, Rafelski SM, Thirstrup D, Wiegraebe W, Singh S, Becker T, Caicedo JC, Carpenter AE. CellProfiler 3.0: Next-generation image processing for biology. PLoS Biol. 2018 Jul 3;16(7):e2005970. doi: 10.1371/journal.pbio.2005970. eCollection 2018 Jul. PubMed PMID: 29969450; PubMed Central PMCID: PMC6029841.
 
-- [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
-  > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+- [ilastik](https://www.ncbi.nlm.nih.gov/pubmed/31570887/)
+  > Berg S, Kutra D, Kroeger T, Straehle CN, Kausler BX, Haubold C, Schiegg M, Ales J, Beier T, Rudy M, Eren K, Cervantes JI, Xu B, Beuttenmueller F, Wolny A, Zhang C, Koethe U, Hamprecht FA, Kreshuk A. ilastik: interactive machine learning for (bio)image analysis. Nat Methods. 2019 Sep 30. doi: 10.1038/s41592-019-0582-9. [Epub ahead of print] Review. PubMed PMID: 31570887.
+
+- [histoCAT](https://www.ncbi.nlm.nih.gov/pubmed/28783155/)
+  > Schapiro D, Jackson HW, Raghuraman S, Fischer JR, Zanotelli VRT, Schulz D, Giesen C, Catena R, Varga Z, Bodenmiller B. histoCAT: analysis of cell phenotypes and interactions in multiplex image cytometry data. Nat Methods. 2017 Sep;14(9):873-876. doi: 10.1038/nmeth.4391. Epub 2017 Aug 7. PubMed PMID: 28783155; PubMed Central PMCID: PMC5617107.
+
+- [imctools](https://github.com/BodenmillerGroup/imctools)
+
+- [Zanotelli & Bodenmiller, Jan 2019](https://github.com/BodenmillerGroup/ImcSegmentationPipeline/blob/development/documentation/imcsegmentationpipeline_documentation.pdf)
+
+- [CellProfiler Bodenmiller custom plugins](https://github.com/BodenmillerGroup/ImcPluginsCP)
 
 ## Software packaging/containerisation tools
 

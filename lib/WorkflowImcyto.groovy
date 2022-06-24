@@ -8,52 +8,51 @@ class WorkflowImcyto {
     // Check and validate parameters
     //
     public static void initialise(params, log) {
-        genomeExistsError(params, log)
 
-        if (!params.fasta) {
-            log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        if (!params.metadata) {
+            log.error "Metadata csv file not specified!"
             System.exit(1)
         }
-    }
 
-    //
-    // Get workflow summary for MultiQC
-    //
-    public static String paramsSummaryMultiqc(workflow, summary) {
-        String summary_section = ''
-        for (group in summary.keySet()) {
-            def group_params = summary.get(group)  // This gets the parameters of that particular group
-            if (group_params) {
-                summary_section += "    <p style=\"font-size:110%\"><b>$group</b></p>\n"
-                summary_section += "    <dl class=\"dl-horizontal\">\n"
-                for (param in group_params.keySet()) {
-                    summary_section += "        <dt>$param</dt><dd><samp>${group_params.get(param) ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>\n"
-                }
-                summary_section += "    </dl>\n"
+        if (!params.full_stack_cppipe) {
+            log.error "CellProfiler full stack cppipe file not specified!"
+            System.exit(1)
+        }
+
+        if (!params.ilastik_stack_cppipe) {
+            log.error "Ilastik stack cppipe file not specified!"
+            System.exit(1)
+        }
+
+        if (!params.segmentation_cppipe) {
+            log.error "CellProfiler segmentation cppipe file not specified!"
+            System.exit(1)
+        }
+
+        if (!params.skip_ilastik) {
+            if (!params.ilastik_training_ilp) {
+                log.error "Ilastik training ilp file not specified!"
+                System.exit(1)
             }
         }
 
-        String yaml_file_text  = "id: '${workflow.manifest.name.replace('/','-')}-summary'\n"
-        yaml_file_text        += "description: ' - this information is collected when the pipeline is started.'\n"
-        yaml_file_text        += "section_name: '${workflow.manifest.name} Workflow Summary'\n"
-        yaml_file_text        += "section_href: 'https://github.com/${workflow.manifest.name}'\n"
-        yaml_file_text        += "plot_type: 'html'\n"
-        yaml_file_text        += "data: |\n"
-        yaml_file_text        += "${summary_section}"
-        return yaml_file_text
     }
 
     //
-    // Exit pipeline if incorrect --genome key provided
+    // Function to get list of [ sample_id, roi_id, path_to_file ]
     //
-    private static void genomeExistsError(params, log) {
-        if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                "  Currently, the available genome keys are:\n" +
-                "  ${params.genomes.keySet().join(", ")}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+    public static ArrayList flattenTiff(ArrayList channel) {
+        def sample = channel[0]
+        def file_list = channel[1]
+        def new_array = []
+        for (int i=0; i<file_list.size(); i++) {
+            def item = []
+            item.add(sample)
+            item.add(file_list[i].getParent().getParent().getName())
+            item.add(file_list[i])
+            new_array.add(item)
         }
+        return new_array
     }
+
 }
