@@ -18,7 +18,7 @@ def checkPathParamList = [
     params.segmentation_cppipe,
     params.ilastik_training_ilp,
     params.compensation_tiff,
-    params.plugins
+    params.plugins_dir
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
@@ -49,7 +49,7 @@ ch_compensation_tiff = params.compensation_tiff ? file(params.compensation_tiff)
 //         ch_compensation_ilastik_stack }
 
 // Plugins required for CellProfiler
-ch_plugins = file(params.plugins)
+ch_plugins = file(params.plugins_dir)
 // .into { ch_preprocess_full_stack_plugin;
 //         ch_preprocess_ilastik_stack_plugin;
 //         ch_segmentation_plugin }

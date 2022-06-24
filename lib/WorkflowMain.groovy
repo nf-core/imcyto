@@ -29,7 +29,7 @@ class WorkflowMain {
         command += "\t--ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \\n"
         command += "\t--segmentation_cppipe './plugins/segmentation.cppipe' \\n"
         command += "\t--ilastik_training_ilp './plugins/ilastik_training_params.ilp' \\n"
-        command += "\t--plugins './plugins/cp_plugins/' \\n"
+        command += "\t--plugins_dir './plugins/cp_plugins/' \\n"
         command += "\t-profile <docker/singularity/podman/shifter/charliecloud/conda/institute>"
         def help_string = ''
         help_string += NfcoreTemplate.logo(workflow, params.monochrome_logs)

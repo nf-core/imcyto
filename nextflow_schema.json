@@ -58,7 +58,7 @@
                     "description": "Tiff file for compensation analysis during CellProfiler preprocessing steps.",
                     "fa_icon": "fas fa-edit"
                 },
-                "plugins": {
+                "plugins_dir": {
                     "type": "string",
                     "default": "$projectDir/assets/plugins",
                     "description": "Path to directory with plugin files required for CellProfiler.",

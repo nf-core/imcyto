@@ -19,7 +19,7 @@ nextflow run nf-core/imcyto \
     --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
     --segmentation_cppipe './plugins/segmentation.cppipe' \
     --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
-    --plugins './plugins/cp_plugins/' \
+    --plugins_dir './plugins/cp_plugins/' \
     -profile docker
 ```
 
