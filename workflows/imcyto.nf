@@ -26,7 +26,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 if (params.input) {
     Channel
         .fromPath(params.input)
-        .map { it -> [ it.name.take(it.name.lastIndexOf('.')), it ] }
+        .map { it -> [ [ id : it.name.take(it.name.lastIndexOf('.')) ], it ] }
         .ifEmpty { exit 1, "Input file not found: ${params.input}" }
         .set { ch_mcd }
 } else {
@@ -60,6 +60,15 @@ ch_plugins = file(params.plugins_dir)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+//
+// MODULE: Loaded from modules/local/
+//
+include { IMCTOOLS                                   } from '../modules/local/imctools'
+// include { CELLPROFILER as CELLPROFILER_FULL_STACK    } from '../modules/local/cellprofiler'
+// include { CELLPROFILER as CELLPROFILER_ILASTIK_STACK } from '../modules/local/cellprofiler'
+// include { CELLPROFILER as CELLPROFILER_SEGMENTATION  } from '../modules/local/cellprofiler'
+// include { ILASTIK                                    } from '../modules/local/ilastik'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -81,6 +90,47 @@ workflow IMCYTO {
 
     ch_versions = Channel.empty()
 
+    //
+    // MODULE: Run imctools
+    //
+    IMCTOOLS (
+        ch_mcd,
+        ch_metadata
+    )
+    ch_versions = ch_versions.mix(IMCTOOLS.out.versions)
+
+    // //
+    // // MODULE: Preprocess full stack images with CellProfiler
+    // //
+    // CELLPROFILER_FULL_STACK (
+
+    // )
+    // ch_versions = ch_versions.mix(CELLPROFILER_FULL_STACK.out.versions.first())
+
+    // //
+    // // MODULE: Preprocess Ilastik stack images with CellProfiler
+    // //
+    // CELLPROFILER_ILASTIK_STACK (
+
+    // )
+
+    // //
+    // // MODULE: Run Ilastik
+    // //
+    // ILASTIK (
+
+    // )
+
+    // //
+    // // MODULE: Segmentation with CellProfiler
+    // //
+    // CELLPROFILER_SEGMENTATION (
+
+    // )
+
+    //
+    // MODULE: Pipeline reporting
+    //
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
