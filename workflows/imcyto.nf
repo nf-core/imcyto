@@ -22,7 +22,7 @@ def checkPathParamList = [
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Check mandatory parameters
+// Check input parameters
 if (params.input) {
     Channel
         .fromPath(params.input)
@@ -45,14 +45,9 @@ if (!params.skip_ilastik) {
 }
 
 ch_compensation_tiff = params.compensation_tiff ? file(params.compensation_tiff) : []
-// .into { ch_compensation_full_stack;
-//         ch_compensation_ilastik_stack }
 
 // Plugins required for CellProfiler
-ch_plugins = file(params.plugins_dir)
-// .into { ch_preprocess_full_stack_plugin;
-//         ch_preprocess_ilastik_stack_plugin;
-//         ch_segmentation_plugin }
+ch_plugins_dir = file(params.plugins_dir)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,8 +59,8 @@ ch_plugins = file(params.plugins_dir)
 // MODULE: Loaded from modules/local/
 //
 include { IMCTOOLS                                   } from '../modules/local/imctools'
-// include { CELLPROFILER as CELLPROFILER_FULL_STACK    } from '../modules/local/cellprofiler'
-// include { CELLPROFILER as CELLPROFILER_ILASTIK_STACK } from '../modules/local/cellprofiler'
+include { CELLPROFILER as CELLPROFILER_FULL_STACK    } from '../modules/local/cellprofiler'
+include { CELLPROFILER as CELLPROFILER_ILASTIK_STACK } from '../modules/local/cellprofiler'
 // include { CELLPROFILER as CELLPROFILER_SEGMENTATION  } from '../modules/local/cellprofiler'
 // include { ILASTIK                                    } from '../modules/local/ilastik'
 
@@ -125,20 +120,26 @@ workflow IMCYTO {
         .map { it -> [ it[0], it[1].sort() ] }
         .set { ch_ilastik_stack_tiff }
 
-    // //
-    // // MODULE: Preprocess full stack images with CellProfiler
-    // //
-    // CELLPROFILER_FULL_STACK (
+    //
+    // MODULE: Preprocess full stack images with CellProfiler
+    //
+    CELLPROFILER_FULL_STACK (
+        ch_full_stack_tiff,
+        ch_full_stack_cppipe,
+        ch_compensation_tiff,
+        ch_plugins_dir
+    )
+    ch_versions = ch_versions.mix(CELLPROFILER_FULL_STACK.out.versions.first())
 
-    // )
-    // ch_versions = ch_versions.mix(CELLPROFILER_FULL_STACK.out.versions.first())
-
-    // //
-    // // MODULE: Preprocess Ilastik stack images with CellProfiler
-    // //
-    // CELLPROFILER_ILASTIK_STACK (
-
-    // )
+    //
+    // MODULE: Preprocess Ilastik stack images with CellProfiler
+    //
+    CELLPROFILER_ILASTIK_STACK (
+        ch_ilastik_stack_tiff,
+        ch_ilastik_stack_cppipe,
+        ch_compensation_tiff,
+        ch_plugins_dir
+    )
 
     // //
     // // MODULE: Run Ilastik
