@@ -61,8 +61,8 @@ ch_plugins_dir = file(params.plugins_dir)
 include { IMCTOOLS                                   } from '../modules/local/imctools'
 include { CELLPROFILER as CELLPROFILER_FULL_STACK    } from '../modules/local/cellprofiler'
 include { CELLPROFILER as CELLPROFILER_ILASTIK_STACK } from '../modules/local/cellprofiler'
-// include { CELLPROFILER as CELLPROFILER_SEGMENTATION  } from '../modules/local/cellprofiler'
-// include { ILASTIK                                    } from '../modules/local/ilastik'
+include { CELLPROFILER as CELLPROFILER_SEGMENTATION  } from '../modules/local/cellprofiler'
+include { ILASTIK                                    } from '../modules/local/ilastik'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,12 +141,30 @@ workflow IMCYTO {
         ch_plugins_dir
     )
 
-    // //
-    // // MODULE: Run Ilastik
-    // //
-    // ILASTIK (
+    //
+    // MODULE: Run Ilastik
+    //
+    if (params.skip_ilastik) {
+        CELLPROFILER_FULL_STACK
+            .out
+            .tiff
+            .join(CELLPROFILER_ILASTIK_STACK.out.tiff)
+            .map { it -> [ it[0], [ it[1], it[2] ].flatten().sort() ] }
+            .set { ch_segmentation_tiff }
+    } else {
+        ILASTIK (
+            CELLPROFILER_ILASTIK_STACK.out.tiff,
+            ch_ilastik_training_ilp
+        )
+        ch_versions = ch_versions.mix(ILASTIK.out.versions.first())
 
-    // )
+        CELLPROFILER_FULL_STACK
+            .out
+            .tiff
+            .join(ILASTIK.out.tiff)
+            .map { it -> [ it[0], [ it[1], it[2] ].flatten().sort() ] }
+            .set { ch_segmentation_tiff }
+    }
 
     // //
     // // MODULE: Segmentation with CellProfiler
