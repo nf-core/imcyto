@@ -126,8 +126,8 @@ workflow IMCYTO {
     CELLPROFILER_FULL_STACK (
         ch_full_stack_tiff,
         ch_full_stack_cppipe,
-        ch_compensation_tiff,
-        ch_plugins_dir
+        ch_plugins_dir,
+        ch_compensation_tiff
     )
     ch_versions = ch_versions.mix(CELLPROFILER_FULL_STACK.out.versions.first())
 
@@ -137,8 +137,8 @@ workflow IMCYTO {
     CELLPROFILER_ILASTIK_STACK (
         ch_ilastik_stack_tiff,
         ch_ilastik_stack_cppipe,
-        ch_compensation_tiff,
-        ch_plugins_dir
+        ch_plugins_dir,
+        ch_compensation_tiff
     )
 
     //
@@ -166,12 +166,15 @@ workflow IMCYTO {
             .set { ch_segmentation_tiff }
     }
 
-    // //
-    // // MODULE: Segmentation with CellProfiler
-    // //
-    // CELLPROFILER_SEGMENTATION (
-
-    // )
+    //
+    // MODULE: Segmentation with CellProfiler
+    //
+    CELLPROFILER_SEGMENTATION (
+        ch_segmentation_tiff,
+        ch_segmentation_cppipe,
+        ch_plugins_dir,
+        []
+    )
 
     //
     // MODULE: Pipeline reporting

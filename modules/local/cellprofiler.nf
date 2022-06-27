@@ -7,19 +7,20 @@ process CELLPROFILER {
     input:
     tuple val(meta), path(tiff)
     path cppipe
-    path ctiff
     path plugin_dir
+    path ctiff
 
     output:
-    tuple val(meta), path("${prefix}/*"), emit: tiff
-    path "versions.yml"                 , emit: versions
+    tuple val(meta), path("${prefix}*.tiff"), emit: tiff
+    tuple val(meta), path("${prefix}*.csv") , emit: csv, optional: true
+    path "versions.yml"                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}"
+    prefix = task.ext.prefix ? task.ext.prefix.replaceAll("\\s","") : "${meta.id}"
     """
     export _JAVA_OPTIONS="-Xms${task.memory.toGiga()/2}g -Xmx${task.memory.toGiga()}g"
 
