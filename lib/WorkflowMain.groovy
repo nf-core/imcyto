@@ -21,15 +21,15 @@ class WorkflowMain {
     // Print help to screen if required
     //
     public static String help(workflow, params, log) {
-        def command = "nextflow run ${workflow.manifest.name} \\n"
-        command += "\t--input './inputs/*.mcd' \\n"
-        command += "\t--outdir <OUTDIR> \\n"
-        command += "\t--metadata './inputs/metadata.csv' \\n"
-        command += "\t--full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \\n"
-        command += "\t--ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \\n"
-        command += "\t--segmentation_cppipe './plugins/segmentation.cppipe' \\n"
-        command += "\t--ilastik_training_ilp './plugins/ilastik_training_params.ilp' \\n"
-        command += "\t--plugins_dir './plugins/cp_plugins/' \\n"
+        def command = "nextflow run ${workflow.manifest.name} \\ \n"
+        command += "\t--input './inputs/*.mcd' \\ \n"
+        command += "\t--outdir <OUTDIR> \\ \n"
+        command += "\t--metadata './inputs/metadata.csv' \\ \n"
+        command += "\t--full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \\ \n"
+        command += "\t--ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \\ \n"
+        command += "\t--segmentation_cppipe './plugins/segmentation.cppipe' \\ \n"
+        command += "\t--ilastik_training_ilp './plugins/ilastik_training_params.ilp' \\ \n"
+        command += "\t--plugins_dir './plugins/cp_plugins/' \\ \n"
         command += "\t-profile <docker/singularity/podman/shifter/charliecloud/conda/institute>"
         def help_string = ''
         help_string += NfcoreTemplate.logo(workflow, params.monochrome_logs)
