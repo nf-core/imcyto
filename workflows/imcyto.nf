@@ -99,6 +99,32 @@ workflow IMCYTO {
     )
     ch_versions = ch_versions.mix(IMCTOOLS.out.versions)
 
+    //
+    // Group full stack files by sample and roi_id
+    //
+    IMCTOOLS
+        .out
+        .full_stack_tiff
+        .map { WorkflowImcyto.flattenTiff(it) }
+        .flatten()
+        .collate(2)
+        .groupTuple()
+        .map { it -> [ it[0], it[1].sort() ] }
+        .set { ch_full_stack_tiff }
+
+    //
+    // Group ilastik stack files by sample and roi_id
+    //
+    IMCTOOLS
+        .out
+        .ilastik_stack
+        .map { WorkflowImcyto.flattenTiff(it) }
+        .flatten()
+        .collate(2)
+        .groupTuple()
+        .map { it -> [ it[0], it[1].sort() ] }
+        .set { ch_ilastik_stack_tiff }
+
     // //
     // // MODULE: Preprocess full stack images with CellProfiler
     // //

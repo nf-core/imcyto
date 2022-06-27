@@ -39,16 +39,16 @@ class WorkflowImcyto {
     }
 
     //
-    // Function to get list of [ sample_id, roi_id, path_to_file ]
+    // Function to get list of [ [ id: sample_id, roi: roi_id ], path_to_file ]
     //
     public static ArrayList flattenTiff(ArrayList channel) {
-        def sample = channel[0]
-        def file_list = channel[1]
         def new_array = []
+        def file_list = channel[1]
         for (int i=0; i<file_list.size(); i++) {
             def item = []
-            item.add(sample)
-            item.add(file_list[i].getParent().getParent().getName())
+            def meta = channel[0].clone()
+            meta.roi = file_list[i].getParent().getParent().getName()
+            item.add(meta)
             item.add(file_list[i])
             new_array.add(item)
         }
