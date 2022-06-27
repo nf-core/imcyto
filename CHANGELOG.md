@@ -5,9 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unpublished Version/ DEV]
 
-### `Added`
+### Major enhancements
 
-* Update pipeline template to nf-core/tools `1.12.1`
+- Pipeline has been re-implemented in [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html)
+- Update pipeline template to nf-core/tools `2.4`
 
 ## [1.0.0] - 2020-05-29
 
