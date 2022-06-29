@@ -2,7 +2,7 @@ process ILASTIK {
     tag "${meta.id}.${meta.roi}"
     label 'process_medium'
 
-    container "ilastik/ilastik-from-binary:1.3.3b1"
+    container "ilastik/ilastik-from-binary:1.4.0b13"
 
     input:
     tuple val(meta), path(tiff)
