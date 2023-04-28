@@ -4,7 +4,6 @@
     nf-core/imcyto
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/imcyto
-
     Website: https://nf-co.re/imcyto
     Slack  : https://nfcore.slack.com/channels/imcyto
 ----------------------------------------------------------------------------------------
