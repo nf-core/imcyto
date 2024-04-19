@@ -4,12 +4,80 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-validation'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_imcyto_pipeline'
+
+def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+
+// Validate input parameters
+WorkflowImcyto.initialise(params, log)
+
+// Check input path parameters to see if they exist
+def checkPathParamList = [
+    params.input,
+    params.metadata,
+    params.full_stack_cppipe,
+    params.ilastik_stack_cppipe,
+    params.segmentation_cppipe,
+    params.ilastik_training_ilp,
+    params.compensation_tiff,
+    params.plugins_dir
+]
+for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+// Check input parameters
+if (params.input) {
+    Channel
+        .fromPath(params.input)
+        .map { it -> [ [ id : it.name.take(it.name.lastIndexOf('.')) ], it ] }
+        .ifEmpty { exit 1, "Input file not found: ${params.input}" }
+        .set { ch_mcd }
+} else {
+   exit 1, "Input file not specified!"
+}
+
+if (params.metadata)             { ch_metadata             = file(params.metadata)             }
+if (params.full_stack_cppipe)    { ch_full_stack_cppipe    = file(params.full_stack_cppipe)    }
+if (params.ilastik_stack_cppipe) { ch_ilastik_stack_cppipe = file(params.ilastik_stack_cppipe) }
+if (params.segmentation_cppipe)  { ch_segmentation_cppipe  = file(params.segmentation_cppipe)  }
+
+if (!params.skip_ilastik) {
+    if (params.ilastik_training_ilp) {
+        ch_ilastik_training_ilp = file(params.ilastik_training_ilp)
+    }
+}
+
+ch_compensation_tiff = params.compensation_tiff ? file(params.compensation_tiff) : []
+
+// Plugins required for CellProfiler
+ch_plugins_dir = file(params.plugins_dir)
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT LOCAL MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+//
+// MODULE: Loaded from modules/local/
+//
+include { IMCTOOLS                                   } from '../modules/local/imctools'
+include { CELLPROFILER as CELLPROFILER_FULL_STACK    } from '../modules/local/cellprofiler'
+include { CELLPROFILER as CELLPROFILER_ILASTIK_STACK } from '../modules/local/cellprofiler'
+include { CELLPROFILER as CELLPROFILER_SEGMENTATION  } from '../modules/local/cellprofiler'
+include { ILASTIK                                    } from '../modules/local/ilastik'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT NF-CORE MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+//
+// MODULE: Installed directly from nf-core/modules
+//
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -22,51 +90,116 @@ workflow IMCYTO {
     take:
     ch_samplesheet // channel: samplesheet read in from --input
 
-    main:
-
-    ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
-
     //
-    // MODULE: Run FastQC
+    // MODULE: Run imctools
     //
-    FASTQC (
-        ch_samplesheet
+    IMCTOOLS (
+        ch_mcd,
+        ch_metadata
     )
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_versions = ch_versions.mix(IMCTOOLS.out.versions)
 
     //
-    // Collate and save software versions
+    // Group full stack files by sample and roi_id
     //
-    softwareVersionsToYAML(ch_versions)
-        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
-        .set { ch_collated_versions }
+    IMCTOOLS
+        .out
+        .full_stack_tiff
+        .map { WorkflowImcyto.flattenTiff(it) }
+        .flatten()
+        .collate(2)
+        .groupTuple()
+        .map { it -> [ it[0], it[1].sort() ] }
+        .set { ch_full_stack_tiff }
 
     //
-    // MODULE: MultiQC
+    // Group ilastik stack files by sample and roi_id
     //
-    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-    ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
-    summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
+    IMCTOOLS
+        .out
+        .ilastik_stack
+        .map { WorkflowImcyto.flattenTiff(it) }
+        .flatten()
+        .collate(2)
+        .groupTuple()
+        .map { it -> [ it[0], it[1].sort() ] }
+        .set { ch_ilastik_stack_tiff }
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList()
+    //
+    // MODULE: Preprocess full stack images with CellProfiler
+    //
+    CELLPROFILER_FULL_STACK (
+        ch_full_stack_tiff,
+        ch_full_stack_cppipe,
+        ch_plugins_dir,
+        ch_compensation_tiff
+    )
+    ch_versions = ch_versions.mix(CELLPROFILER_FULL_STACK.out.versions.first())
+
+    //
+    // MODULE: Preprocess Ilastik stack images with CellProfiler
+    //
+    CELLPROFILER_ILASTIK_STACK (
+        ch_ilastik_stack_tiff,
+        ch_ilastik_stack_cppipe,
+        ch_plugins_dir,
+        ch_compensation_tiff
     )
 
-    emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
+    //
+    // MODULE: Run Ilastik
+    //
+    if (params.skip_ilastik) {
+        CELLPROFILER_FULL_STACK
+            .out
+            .tiff
+            .join(CELLPROFILER_ILASTIK_STACK.out.tiff)
+            .map { it -> [ it[0], [ it[1], it[2] ].flatten().sort() ] }
+            .set { ch_segmentation_tiff }
+    } else {
+        ILASTIK (
+            CELLPROFILER_ILASTIK_STACK.out.tiff,
+            ch_ilastik_training_ilp
+        )
+        ch_versions = ch_versions.mix(ILASTIK.out.versions.first())
+
+        CELLPROFILER_FULL_STACK
+            .out
+            .tiff
+            .join(ILASTIK.out.tiff)
+            .map { it -> [ it[0], [ it[1], it[2] ].flatten().sort() ] }
+            .set { ch_segmentation_tiff }
+    }
+
+    //
+    // MODULE: Segmentation with CellProfiler
+    //
+    CELLPROFILER_SEGMENTATION (
+        ch_segmentation_tiff,
+        ch_segmentation_cppipe,
+        ch_plugins_dir,
+        []
+    )
+
+    //
+    // MODULE: Pipeline reporting
+    //
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    COMPLETION EMAIL AND SUMMARY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+workflow.onComplete {
+    if (params.email || params.email_on_fail) {
+        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, [])
+    }
+    NfcoreTemplate.summary(workflow, params, log)
 }
 
 /*

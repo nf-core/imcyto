@@ -6,6 +6,7 @@
 
 ## Introduction
 
+<<<<<<< HEAD
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
 ## Samplesheet input
@@ -52,12 +53,27 @@ TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
+=======
+>>>>>>> dev
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
+<<<<<<< HEAD
 nextflow run nf-core/imcyto --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+=======
+nextflow run nf-core/imcyto \
+    --input "./inputs/*.mcd" \
+    --outdir <OUTDIR> \
+    --metadata './inputs/metadata.csv' \
+    --full_stack_cppipe './plugins/full_stack_preprocessing.cppipe' \
+    --ilastik_stack_cppipe './plugins/ilastik_stack_preprocessing.cppipe' \
+    --segmentation_cppipe './plugins/segmentation.cppipe' \
+    --ilastik_training_ilp './plugins/ilastik_training_params.ilp' \
+    --plugins_dir './plugins/cp_plugins/' \
+    -profile docker
+>>>>>>> dev
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
