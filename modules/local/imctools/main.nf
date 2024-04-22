@@ -2,10 +2,10 @@ process IMCTOOLS {
     tag "$meta.id"
     label 'process_medium'
 
-    conda (params.enable_conda ? "bioconda::imctools=1.0.5" : null)
+    conda "bioconda::imctools=1.0.5"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/imctools:1.0.5--py_0':
-        'quay.io/biocontainers/imctools:1.0.5--py_0' }"
+        'biocontainers/imctools:1.0.5--py_0' }"
 
     input:
     tuple val(meta), path(mcd)
