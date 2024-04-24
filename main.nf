@@ -36,17 +36,13 @@ workflow NFCORE_IMCYTO {
     samplesheet // channel: samplesheet read in from --input
 
     main:
-
     //
     // WORKFLOW: Run pipeline
     //
-    IMCYTO (
-        samplesheet
-    )
+    IMCYTO(samplesheet)
 
     emit:
-    multiqc_report = IMCYTO.out.multiqc_report // channel: /path/to/multiqc_report.html
-
+    versions = IMCYTO.out.versions
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,7 +84,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        NFCORE_IMCYTO.out.multiqc_report
+        NFCORE_IMCYTO.out.versions
     )
 }
 

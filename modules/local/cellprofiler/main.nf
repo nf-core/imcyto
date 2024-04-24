@@ -2,7 +2,7 @@ process CELLPROFILER {
     tag "${meta.id}.${meta.roi}"
     label 'process_high'
 
-    container "cellprofiler/cellprofiler:4.2.1"
+    container "docker.io/cellprofiler/cellprofiler:4.2.1"
 
     input:
     tuple val(meta), path(tiff)
