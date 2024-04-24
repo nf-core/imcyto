@@ -5,13 +5,8 @@
 */
 
 include { paramsSummaryMap       } from 'plugin/nf-validation'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_imcyto_pipeline'
-
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-
-// Validate input parameters
-WorkflowImcyto.initialise(params, log)
+include { softwareVersionsToYAML } from '../../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText } from '../../subworkflows/local/utils_nfcore_imcyto_pipeline'
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -58,11 +53,11 @@ ch_plugins_dir = file(params.plugins_dir)
 // MODULE: Loaded from modules/local/
 //
 
-include { IMCTOOLS                                   } from '../modules/local/imctools/main'
-include { CELLPROFILER as CELLPROFILER_FULL_STACK    } from '../modules/local/cellprofiler/main'
-include { CELLPROFILER as CELLPROFILER_ILASTIK_STACK } from '../modules/local/cellprofiler/main'
-include { CELLPROFILER as CELLPROFILER_SEGMENTATION  } from '../modules/local/cellprofiler/main'
-include { ILASTIK                                    } from '../modules/local/ilastik/main'
+include { IMCTOOLS                                   } from '../../modules/local/imctools/main'
+include { CELLPROFILER as CELLPROFILER_FULL_STACK    } from '../../modules/local/cellprofiler/main'
+include { CELLPROFILER as CELLPROFILER_ILASTIK_STACK } from '../../modules/local/cellprofiler/main'
+include { CELLPROFILER as CELLPROFILER_SEGMENTATION  } from '../../modules/local/cellprofiler/main'
+include { ILASTIK                                    } from '../../modules/local/ilastik/main'
 
 
 /*
@@ -72,9 +67,12 @@ include { ILASTIK                                    } from '../modules/local/il
 */
 
 workflow IMCYTO {
-
     take:
     ch_samplesheet // channel: samplesheet read in from --input
+
+
+    main:
+    ch_versions = Channel.empty()
 
     //
     // MODULE: Run imctools
@@ -164,6 +162,9 @@ workflow IMCYTO {
         ch_plugins_dir,
         []
     )
+    emit:
+    versions = ch_versions
+
 }
 
 /*
