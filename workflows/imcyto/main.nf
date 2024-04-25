@@ -33,12 +33,12 @@ if (params.input) {
     exit 1, "Input file not specified!"
 }
 
-ch_compensation_tiff    = params.compensation_tiff    ? file(params.compensation_tiff)    : Channel.empty()
-ch_full_stack_cppipe    = params.full_stack_cppipe    ? file(params.full_stack_cppipe)    : Channel.empty()
-ch_ilastik_stack_cppipe = params.ilastik_stack_cppipe ? file(params.ilastik_stack_cppipe) : Channel.empty()
-ch_ilastik_training_ilp = params.ilastik_training_ilp ? file(params.ilastik_training_ilp) : Channel.empty()
-ch_metadata             = params.metadata             ? file(params.metadata)             : Channel.empty()
-ch_segmentation_cppipe  = params.segmentation_cppipe  ? file(params.segmentation_cppipe)  : Channel.empty()
+ch_compensation_tiff    = params.compensation_tiff    ? file(params.compensation_tiff)    : Channel.value([])
+ch_full_stack_cppipe    = params.full_stack_cppipe    ? file(params.full_stack_cppipe)    : Channel.value([])
+ch_ilastik_stack_cppipe = params.ilastik_stack_cppipe ? file(params.ilastik_stack_cppipe) : Channel.value([])
+ch_ilastik_training_ilp = params.ilastik_training_ilp ? file(params.ilastik_training_ilp) : Channel.value([])
+ch_metadata             = params.metadata             ? file(params.metadata)             : Channel.value([])
+ch_segmentation_cppipe  = params.segmentation_cppipe  ? file(params.segmentation_cppipe)  : Channel.value([])
 
 // Plugins required for CellProfiler
 ch_plugins_dir = file(params.plugins_dir)
