@@ -1,6 +1,7 @@
 repository_type: pipeline
 lint:
   nextflow_config:
-    - params.plugins_dir
+    - config_defaults:
+        - params.plugins_dir
   files_unchanged:
     - assets/sendmail_template.txt
