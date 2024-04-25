@@ -88,7 +88,8 @@ workflow IMCYTO {
     // Group full stack files by sample and roi_id
     //
     IMCTOOLS.out.full_stack_tiff
-        .map { flattenTiff(it) }
+        .map{ meta, tiff -> [ [meta + [roi:tiff[0].getParent().getParent().getName()]], tiff ]}
+        .transpose(by: [1])
         .flatten()
         .collate(2)
         .groupTuple()
@@ -100,7 +101,8 @@ workflow IMCYTO {
     //
 
     IMCTOOLS.out.ilastik_stack
-        .map { flattenTiff(it) }
+        .map{ meta, tiff -> [ [meta + [roi:tiff[0].getParent().getParent().getName()]], tiff ]}
+        .transpose(by: [1])
         .flatten()
         .collate(2)
         .groupTuple()
@@ -165,27 +167,6 @@ workflow IMCYTO {
     emit:
     versions = ch_versions
 
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    FUNCTIONS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-// Function to get list of [ [ id: sample_id, roi: roi_id ], path_to_file ]
-def flattenTiff(ArrayList channel) {
-    def new_array = []
-    def file_list = channel[1]
-    for (int i=0; i<file_list.size(); i++) {
-        def item = []
-        def meta = channel[0].clone()
-        meta.roi = file_list[i].getParent().getParent().getName()
-        item.add(meta)
-        item.add(file_list[i])
-        new_array.add(item)
-    }
-    return new_array
 }
 
 /*
