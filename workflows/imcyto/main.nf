@@ -88,7 +88,7 @@ workflow IMCYTO {
     // Group full stack files by sample and roi_id
     //
     IMCTOOLS.out.full_stack_tiff
-        .map{ meta, tiff -> [ [meta + [roi:tiff[0].getParent().getParent().getName()]], tiff ]}
+        .map{ meta, tiff -> [ [meta + [roi:tiff[0].parent.parent.name]], tiff ]}
         .transpose(by: [1])
         .flatten()
         .collate(2)
@@ -101,7 +101,7 @@ workflow IMCYTO {
     //
 
     IMCTOOLS.out.ilastik_stack
-        .map{ meta, tiff -> [ [meta + [roi:tiff[0].getParent().getParent().getName()]], tiff ]}
+        .map{ meta, tiff -> [ [meta + [roi:tiff[0].parent.parent.name]], tiff ]}
         .transpose(by: [1])
         .flatten()
         .collate(2)
