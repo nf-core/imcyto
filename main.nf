@@ -31,7 +31,6 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_imcy
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
 workflow NFCORE_IMCYTO {
-
     take:
     samplesheet // channel: samplesheet read in from --input
 
@@ -44,6 +43,7 @@ workflow NFCORE_IMCYTO {
     emit:
     versions = IMCYTO.out.versions
 }
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -57,27 +57,25 @@ workflow {
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
-    PIPELINE_INITIALISATION (
+    PIPELINE_INITIALISATION(
         params.version,
         params.help,
         params.validate_params,
         params.monochrome_logs,
         args,
-        params.outdir,
-        params.input
+        params.outdir
+        // params.input
     )
 
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_IMCYTO (
-        PIPELINE_INITIALISATION.out.samplesheet
-    )
+    NFCORE_IMCYTO(params.input)
 
     //
     // SUBWORKFLOW: Run completion tasks
     //
-    PIPELINE_COMPLETION (
+    PIPELINE_COMPLETION(
         params.email,
         params.email_on_fail,
         params.plaintext_email,
